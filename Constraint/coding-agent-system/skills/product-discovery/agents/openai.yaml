@@ -1,0 +1,6 @@
+interface:
+  display_name: "Product Discovery"
+  short_description: "Clarify product intent before implementation"
+  default_prompt: "Use $product-discovery to clarify this product idea and expose the decisions that must be made before implementation."
+policy:
+  allow_implicit_invocation: false

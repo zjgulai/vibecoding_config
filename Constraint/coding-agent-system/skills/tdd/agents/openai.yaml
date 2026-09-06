@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test-Driven Development"
+  short_description: "Implement in small red-green-refactor cycles"
+  default_prompt: "Use $tdd to implement this behavior through the smallest observable red-green-refactor cycles."

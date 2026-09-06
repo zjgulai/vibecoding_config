@@ -1,0 +1,43 @@
+---
+description: 数据库与 SQL 规则
+globs:
+  - "**/*.sql"
+  - "**​/alembic/​**/*.py"
+  - "**​/migrations/​**/*.py"
+alwaysApply: true
+---
+
+# 数据库规则
+
+## 技术偏好
+
+- PostgreSQL 优先
+- SQLAlchemy 2.0 ORM
+- 性能敏感场景优先原生 SQL
+
+---
+
+## SQL 使用规则
+
+- sql/ 中只放正式 SQL
+- 一次性分析 SQL 放 drafts/analysis/ 或 tmp/
+- 不要把临时 SQL 直接混入正式区
+- SQL 文件命名必须体现用途与主题
+
+---
+
+## 查询与性能
+
+- 复杂查询建议使用 EXPLAIN ANALYZE 验证执行计划
+- 索引设计必须说明查询场景
+- 不做基于猜测的索引设计
+- 性能优化先定位瓶颈，再改写查询
+
+---
+
+## 迁移规则
+
+- 数据迁移必须可回滚
+- 禁止破坏性变更
+- 执行高风险迁移前先确认
+- 修改 schema 前先说明影响范围

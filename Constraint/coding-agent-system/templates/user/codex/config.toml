@@ -1,0 +1,3 @@
+# Install as ~/.codex/config.toml unless CODEX_HOME overrides the directory.
+# This portable template intentionally sets no model, approval, or sandbox policy.
+# Preserve stricter user or organization policy and merge local choices manually.

@@ -1,0 +1,13 @@
+{
+  "schema_version": "1",
+  "protected_paths": [
+    ".github/workflows",
+    "infra/production"
+  ],
+  "linked_change_groups": [
+    [
+      "schema",
+      "migrations"
+    ]
+  ]
+}

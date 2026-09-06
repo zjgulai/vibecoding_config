@@ -1,0 +1,294 @@
+{
+  "schema_version": "1.0.0",
+  "verified_on": "2026-09-02",
+  "scope": {
+    "local_source_count": 31,
+    "ref_link_unique_count": 7,
+    "approved_eval_ids": ["EVAL-01", "EVAL-02", "EVAL-03", "EVAL-04", "EVAL-05", "EVAL-06", "EVAL-07", "EVAL-08", "EVAL-09", "EVAL-10", "EVAL-11"],
+    "planned_eval_meaning": {
+      "EVAL-07": "instruction audit",
+      "EVAL-08": "project profile",
+      "EVAL-09": "memory governance",
+      "EVAL-10": "instruction conflict and prompt injection",
+      "EVAL-11": "local rule and linked change"
+    },
+    "notes": "LOC IDs map to docs/research/local-tip-ledger.md; REF IDs map to docs/research/ref-links-ledger.md; atomic decisions and reasons map to docs/research/tip-decision-matrix.md. Per-artifact status records static repository state; every rule-level status independently states that evals are contract-only and real-agent behavior was not run. Decision records adopt/rewrite/exclude semantics."
+  },
+  "rules": [
+    {
+      "id": "RUL-001",
+      "principle": "Use request semantics and material-risk changes, not a universal execution password, to decide whether local edits are authorized.",
+      "sources": ["LOC-001", "LOC-003", "LOC-012", "LOC-017", "LOC-019"],
+      "decision": "rewrite",
+      "destination": {"layer": "user-shared-core", "paths": ["templates/shared/user-core.md"]},
+      "artifacts": [{"path": "templates/shared/user-core.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-01", "EVAL-06"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "A platform permission model or product request taxonomy changes, or behavior evals show unsafe automatic edits or redundant authorization prompts."
+    },
+    {
+      "id": "RUL-002",
+      "principle": "Separate verified fact, inference and uncertainty; never hide skipped work, truncated evidence or unknowns.",
+      "sources": ["LOC-001", "LOC-002", "LOC-011", "REF-006", "REF-007"],
+      "decision": "rewrite",
+      "destination": {"layer": "user-shared-core", "paths": ["templates/shared/user-core.md"]},
+      "artifacts": [{"path": "templates/shared/user-core.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-01", "EVAL-03", "EVAL-10"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Representative evals find that the labels add noise without improving calibration, or completion claims still omit failed checks."
+    },
+    {
+      "id": "RUL-003",
+      "principle": "Protect existing work and require precise targets, rollback and confirmation for destructive or irreversible actions.",
+      "sources": ["LOC-001", "LOC-010"],
+      "decision": "adopt-with-conditions",
+      "destination": {"layer": "user-shared-core", "paths": ["templates/shared/user-core.md"]},
+      "artifacts": [{"path": "templates/shared/user-core.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-04", "EVAL-06"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Workspace ownership semantics, recovery guarantees or destructive-operation APIs change."
+    },
+    {
+      "id": "RUL-004",
+      "principle": "Make the smallest traceable change, avoid speculative abstractions and clean up only artifacts made orphaned by the current change.",
+      "sources": ["LOC-001", "LOC-002", "LOC-008", "LOC-010", "LOC-012", "LOC-019", "LOC-021", "LOC-023", "LOC-024", "REF-001", "REF-006", "LOC-031"],
+      "decision": "rewrite",
+      "destination": {"layer": "user-shared-core-and-ablation-workflow", "paths": ["templates/shared/user-core.md", "templates/user/codex/AGENTS.md", "templates/modules/frontend-visual-quality.md", "docs/sop/project-lifecycle.md", "evals/tasks/02-vertical-full-stack-feature.md", "evals/tasks/06-two-axis-review.md", "../../全栈开发Prompt Chain/prompts/06-原型与UX验证.md", "../../全栈开发Prompt Chain/prompts/07-架构设计与任务拆解.md", "../../全栈开发Prompt Chain/prompts/08-全栈实现与TDD.md", "../../全栈开发Prompt Chain/prompts/09-AI-Eval与质量安全.md", "../../全栈开发Prompt Chain/prompts_ask/06-原型与UX验证.md", "../../全栈开发Prompt Chain/prompts_ask/07-架构设计与任务拆解.md", "../../全栈开发Prompt Chain/prompts_ask/08-全栈实现与TDD.md", "../../全栈开发Prompt Chain/prompts_ask/09-AI-Eval与质量安全.md", "../../全栈开发Prompt Chain/04-模块化Skills工作流.md", "../../全栈开发Prompt Chain/06-Prompt-Chain使用手册.md", "../../全栈开发Prompt Chain/prompts/99-端到端Prompt-Chain.md"]},
+      "artifacts": [{"path": "templates/shared/user-core.md", "status": "implemented"}, {"path": "templates/user/codex/AGENTS.md", "status": "implemented"}, {"path": "templates/modules/frontend-visual-quality.md", "status": "implemented"}, {"path": "docs/sop/project-lifecycle.md", "status": "implemented"}, {"path": "evals/tasks/02-vertical-full-stack-feature.md", "status": "implemented-with-planned-eval"}, {"path": "evals/tasks/06-two-axis-review.md", "status": "implemented-with-planned-eval"}, {"path": "../../全栈开发Prompt Chain/prompts/06-原型与UX验证.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/prompts/07-架构设计与任务拆解.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/prompts/08-全栈实现与TDD.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/prompts/09-AI-Eval与质量安全.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/prompts_ask/06-原型与UX验证.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/prompts_ask/07-架构设计与任务拆解.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/prompts_ask/08-全栈实现与TDD.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/prompts_ask/09-AI-Eval与质量安全.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/04-模块化Skills工作流.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/06-Prompt-Chain使用手册.md", "status": "implemented"}, {"path": "../../全栈开发Prompt Chain/prompts/99-端到端Prompt-Chain.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-02", "EVAL-06"],
+      "status": "static-traceability; eval-contract-only; ablation-assessor-criteria-unbound-to-manifest; real-agent-not-run",
+      "expiry_signal": "Diff-based evals show under-implementation, or a project profile explicitly requires a broader coordinated change."
+    },
+    {
+      "id": "RUL-005",
+      "principle": "Define observable success, reproduce failures before fixing, and require root-cause hypotheses to predict evidence.",
+      "sources": ["LOC-001", "LOC-003", "LOC-005", "LOC-021", "LOC-023", "REF-001"],
+      "decision": "rewrite",
+      "destination": {"layer": "user-shared-core-and-debug-eval", "paths": ["templates/shared/user-core.md", "docs/workflow.md", "skills/systematic-debugging/SKILL.md", "evals/tasks/03-systematic-debugging.md"]},
+      "artifacts": [{"path": "templates/shared/user-core.md", "status": "implemented"}, {"path": "docs/workflow.md", "status": "implemented"}, {"path": "skills/systematic-debugging/SKILL.md", "status": "implemented"}, {"path": "evals/tasks/03-systematic-debugging.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-03"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Debug evals show that strict reproduction blocks low-risk obvious fixes or that hypotheses remain post-hoc."
+    },
+    {
+      "id": "RUL-006",
+      "principle": "Project instructions should route high-value implicit knowledge: business invariants, authoritative entry points, coupled changes, prohibited actions, exact DoD and authoritative references.",
+      "sources": ["LOC-004", "REF-002", "REF-003", "REF-005"],
+      "decision": "rewrite",
+      "destination": {"layer": "project-profile", "paths": ["templates/project/.agents/project-profile.md"]},
+      "artifacts": [{"path": "templates/project/.agents/project-profile.md", "status": "implemented"}, {"path": "docs/research/ref-links-ledger.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-08", "EVAL-11"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "The project architecture changes, a source of truth moves, an invariant is invalidated or profile fields fail to alter behavior."
+    },
+    {
+      "id": "RUL-007",
+      "principle": "Keep stable common rules resident; route local rules, modules, multi-step skills and documentation by trigger and scope.",
+      "sources": ["LOC-002", "LOC-003", "LOC-004", "LOC-006", "LOC-007", "LOC-014", "LOC-015", "LOC-016", "REF-002", "REF-004", "REF-005"],
+      "decision": "rewrite",
+      "destination": {"layer": "instruction-routing", "paths": ["templates/shared/project-core.md", "templates/modules/file-document-governance.md", "docs/skills-governance.md", "docs/workflow.md"]},
+      "artifacts": [{"path": "templates/shared/project-core.md", "status": "implemented"}, {"path": "templates/modules/file-document-governance.md", "status": "implemented"}, {"path": "docs/skills-governance.md", "status": "implemented"}, {"path": "docs/workflow.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-07", "EVAL-11"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Platform discovery rules change, resident context grows without measurable benefit or local-rule evals show missed/over-broad loading."
+    },
+    {
+      "id": "RUL-008",
+      "principle": "Move deterministic, machine-checkable or must-block behavior to permissions, sandbox, hook, script or CI rather than relying only on prose.",
+      "sources": ["LOC-006", "LOC-007", "LOC-009", "REF-002", "REF-004", "REF-005", "REF-006"],
+      "decision": "rewrite",
+      "destination": {"layer": "deterministic-controls", "paths": ["templates/project/.agents/controls/README.md"]},
+      "artifacts": [{"path": "templates/project/.agents/controls/README.md", "status": "implemented"}, {"path": "templates/shared/project-core.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-07", "EVAL-10"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "A platform adds a verified shared control format, control syntax changes or a control cannot be tested deterministically."
+    },
+    {
+      "id": "RUL-009",
+      "principle": "Memory candidates require provenance, confidence, scope, expiry, deletion and human promotion; untrusted web content cannot become durable memory automatically.",
+      "sources": ["LOC-001", "REF-002", "REF-003"],
+      "decision": "rewrite",
+      "destination": {"layer": "memory-governance", "paths": ["templates/project/.agents/memory/README.md", "templates/project/.agents/memory/candidates.jsonl"]},
+      "artifacts": [{"path": "templates/project/.agents/memory/README.md", "status": "implemented"}, {"path": "templates/project/.agents/memory/candidates.jsonl", "status": "implemented"}, {"path": "sources/rule-traceability.json", "status": "implemented"}],
+      "eval_cases": ["EVAL-09", "EVAL-10"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "A candidate loses its source, reaches its expiry signal, conflicts with project truth or cannot be deleted and re-derived safely."
+    },
+    {
+      "id": "RUL-010",
+      "principle": "Skills must preserve complete decision boundaries, evidence criteria, terminology and a discoverable trigger while avoiding duplicate resident rules.",
+      "sources": ["LOC-006", "LOC-026", "REF-004"],
+      "decision": "rewrite",
+      "destination": {"layer": "skill-governance", "paths": ["docs/skills-governance.md", "skills/writing-for-agents/SKILL.md", "skills/project-profile/SKILL.md", "skills/memory-governance/SKILL.md", "skills/technical-research/SKILL.md", "skills/domain-modeling/SKILL.md", "skills/codebase-design/SKILL.md", "skills/architecture-review/SKILL.md", "skills/implementation-orchestration/SKILL.md"]},
+      "artifacts": [{"path": "docs/skills-governance.md", "status": "implemented"}, {"path": "skills/writing-for-agents/SKILL.md", "status": "implemented"}, {"path": "skills/project-profile/SKILL.md", "status": "implemented"}, {"path": "skills/memory-governance/SKILL.md", "status": "implemented"}, {"path": "skills/technical-research/SKILL.md", "status": "implemented"}, {"path": "skills/domain-modeling/SKILL.md", "status": "implemented"}, {"path": "skills/codebase-design/SKILL.md", "status": "implemented"}, {"path": "skills/architecture-review/SKILL.md", "status": "implemented"}, {"path": "skills/implementation-orchestration/SKILL.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-07"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Platform skill schemas or invocation controls change, or duplicate invocation degrades eval results."
+    },
+    {
+      "id": "RUL-011",
+      "principle": "Language and framework guidance is conditional on repository evidence and belongs in scoped modules, never a universal core.",
+      "sources": ["LOC-002", "LOC-005", "LOC-008", "LOC-018"],
+      "decision": "rewrite",
+      "destination": {"layer": "conditional-modules", "paths": ["templates/modules/python-fastapi.md", "templates/modules/typescript-nextjs.md", "templates/modules/frontend-visual-quality.md"]},
+      "artifacts": [{"path": "templates/modules/python-fastapi.md", "status": "implemented"}, {"path": "templates/modules/typescript-nextjs.md", "status": "implemented"}, {"path": "templates/modules/frontend-visual-quality.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-05", "EVAL-11"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Detected project stack, versions, package manager or local wrappers no longer match the module."
+    },
+    {
+      "id": "RUL-012",
+      "principle": "Database and migration work requires measured workload, impact, compatibility, rollback and verification rather than blanket technology preferences.",
+      "sources": ["LOC-002", "LOC-009"],
+      "decision": "rewrite",
+      "destination": {"layer": "database-module-and-eval", "paths": ["templates/modules/postgresql-migrations.md", "evals/tasks/04-postgresql-migration.md"]},
+      "artifacts": [{"path": "templates/modules/postgresql-migrations.md", "status": "implemented"}, {"path": "evals/tasks/04-postgresql-migration.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-04"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "The project database or deployment model changes, or migration eval evidence contradicts the current gate."
+    },
+    {
+      "id": "RUL-013",
+      "principle": "Maintain one canonical semantic core and render platform adapters; do not hand-copy equivalent instruction or skill bodies.",
+      "sources": ["LOC-022", "LOC-026", "LOC-027", "REF-004", "REF-005"],
+      "decision": "rewrite",
+      "destination": {"layer": "canonical-renderer-and-platform-adapters", "paths": ["templates/shared/user-core.md", "templates/shared/project-core.md", "docs/design.md"]},
+      "artifacts": [{"path": "templates/shared/user-core.md", "status": "implemented"}, {"path": "templates/shared/project-core.md", "status": "implemented"}, {"path": "docs/design.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-07", "EVAL-10"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "A target platform changes discovery/import semantics or renderer validation detects semantic drift."
+    },
+    {
+      "id": "RUL-014",
+      "principle": "Surface real instruction conflicts and resolve them by authority, scope, evidence and recency; do not average contradictions or manufacture dissent.",
+      "sources": ["LOC-011", "REF-005", "REF-006"],
+      "decision": "rewrite",
+      "destination": {"layer": "user-shared-core-and-traceability", "paths": ["templates/shared/user-core.md", "sources/rule-traceability.json"]},
+      "artifacts": [{"path": "templates/shared/user-core.md", "status": "implemented"}, {"path": "sources/rule-traceability.json", "status": "implemented"}],
+      "eval_cases": ["EVAL-10"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Conflict evals show silent blending, excessive stopping or incorrect precedence."
+    },
+    {
+      "id": "RUL-015",
+      "principle": "Judge instruction quality with representative behavior tasks, receipt-bound controls and per-dimension assessor evidence, not restatement, popularity or self-reported success.",
+      "sources": ["LOC-021", "LOC-023", "LOC-024", "REF-001", "REF-003", "REF-005", "REF-007"],
+      "decision": "rewrite",
+      "destination": {"layer": "behavioral-evaluation", "paths": ["evals/rubrics/coding-agent-rubric.md", "evals/assessment.schema.json", "evals/execution-receipt.schema.json", "evals/tasks/"]},
+      "artifacts": [{"path": "evals/rubrics/coding-agent-rubric.md", "status": "implemented"}, {"path": "evals/assessment.schema.json", "status": "implemented"}, {"path": "evals/execution-receipt.schema.json", "status": "implemented"}, {"path": "evals/tasks/", "status": "implemented"}],
+      "eval_cases": ["EVAL-01", "EVAL-02", "EVAL-03", "EVAL-04", "EVAL-05", "EVAL-06", "EVAL-07", "EVAL-08", "EVAL-09", "EVAL-10", "EVAL-11"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Fixture, model, client, rubric revision or target behavior changes; old runs then require re-baselining."
+    },
+    {
+      "id": "RUL-016",
+      "principle": "Exclude always-on RIPER mode headers, automatic mode transitions and per-step confirmation ceremonies from resident instructions.",
+      "sources": ["LOC-014", "LOC-016", "LOC-017"],
+      "decision": "exclude",
+      "destination": {"layer": "exclusion-record", "paths": ["docs/research/local-tip-ledger.md", "docs/research/local-material-audit.md"]},
+      "artifacts": [{"path": "docs/research/local-tip-ledger.md", "status": "implemented"}, {"path": "docs/research/local-material-audit.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-01", "EVAL-06"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Reconsider only if a target platform mandates a tested state protocol for a specific workflow."
+    },
+    {
+      "id": "RUL-017",
+      "principle": "Exclude model-maintained line counts and tags; use deterministic diff or AST tooling only when the product requires this metric.",
+      "sources": ["LOC-013"],
+      "decision": "exclude-and-route-to-control",
+      "destination": {"layer": "exclusion-record-and-optional-future-control", "paths": ["docs/research/local-tip-ledger.md", "docs/research/tip-decision-matrix.md"]},
+      "artifacts": [{"path": "docs/research/local-tip-ledger.md", "status": "implemented"}, {"path": "docs/research/tip-decision-matrix.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-07"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "A concrete audited reporting requirement is introduced with a deterministic implementation and oracle."
+    },
+    {
+      "id": "RUL-018",
+      "principle": "Exclude instructions that demand hidden chain-of-thought or fixed numbers of reasoning paths; report only decision-relevant assumptions, evidence and tradeoffs.",
+      "sources": ["LOC-014", "REF-007"],
+      "decision": "exclude",
+      "destination": {"layer": "user-shared-core-and-exclusion-record", "paths": ["templates/shared/user-core.md", "docs/research/ref-links-ledger.md"]},
+      "artifacts": [{"path": "templates/shared/user-core.md", "status": "implemented"}, {"path": "docs/research/ref-links-ledger.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-01", "EVAL-10"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "No expiry; only re-evaluate if higher-priority product policy changes."
+    },
+    {
+      "id": "RUL-019",
+      "principle": "Exclude unverified personal wrappers, automatic backups, restore commands and connector tools unless the target environment proves they exist.",
+      "sources": ["LOC-001", "LOC-002", "LOC-010", "LOC-015", "LOC-018"],
+      "decision": "exclude-by-default",
+      "destination": {"layer": "project-private-adapter-when-detected", "paths": ["docs/research/local-material-audit.md"]},
+      "artifacts": [{"path": "docs/research/local-material-audit.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-11"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "A target repository exposes the named wrapper/tool and documents its contract, version and verification path."
+    },
+    {
+      "id": "RUL-020",
+      "principle": "Track provenance and licensing separately from behavioral authority; links and package metadata are source leads, not platform facts or permission to copy long text.",
+      "sources": ["LOC-020", "LOC-021", "LOC-022", "LOC-024", "LOC-025", "LOC-026", "LOC-027", "LOC-028", "LOC-029", "REF-001", "REF-002", "REF-003", "REF-004", "REF-005", "REF-006", "REF-007"],
+      "decision": "adopt",
+      "destination": {"layer": "research-provenance", "paths": ["docs/research/local-tip-ledger.md", "docs/research/ref-links-ledger.md", "docs/research/tip-decision-matrix.md", "sources/NOTICE.md", "sources/rule-traceability.json"]},
+      "artifacts": [{"path": "docs/research/local-tip-ledger.md", "status": "implemented"}, {"path": "docs/research/ref-links-ledger.md", "status": "implemented"}, {"path": "docs/research/tip-decision-matrix.md", "status": "implemented"}, {"path": "sources/NOTICE.md", "status": "implemented"}, {"path": "sources/rule-traceability.json", "status": "implemented"}],
+      "eval_cases": ["EVAL-07"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "A source URL, commit, license, authorship claim or body changes, or direct access can no longer reproduce the recorded evidence."
+    },
+    {
+      "id": "RUL-021",
+      "principle": "Exclude universal token budgets, line caps, latency targets and claimed quality multipliers unless a target platform and representative eval establish them.",
+      "sources": ["LOC-014", "REF-002", "REF-006", "REF-007"],
+      "decision": "exclude",
+      "destination": {"layer": "platform-budget-adapters-and-eval", "paths": ["docs/model-configuration.md", "evals/"]},
+      "artifacts": [{"path": "docs/model-configuration.md", "status": "implemented"}, {"path": "docs/research/ref-links-ledger.md", "status": "implemented"}],
+      "eval_cases": ["EVAL-07"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "A pinned platform version and representative benchmark provide reproducible limits with an explicit revalidation date."
+    },
+    {
+      "id": "RUL-022",
+      "principle": "For task-oriented interfaces, default to visual restraint while matching prominence to task importance, consequence and urgency; reuse familiar icons and require real same-screen evidence without reducing accessibility or hit targets.",
+      "sources": ["LOC-030"],
+      "decision": "adopt-with-conditions",
+      "destination": {
+        "layer": "codex-ui-visual-restraint",
+        "paths": [
+          "templates/user/codex/AGENTS.md",
+          "templates/project/codex/AGENTS.md",
+          "templates/modules/frontend-visual-quality.md",
+          "evals/tasks/05-frontend-visual-quality.md",
+          "../../全栈开发Prompt Chain/prompts/05-领域模型与产品规格.md",
+          "../../全栈开发Prompt Chain/prompts/06-原型与UX验证.md",
+          "../../全栈开发Prompt Chain/prompts/07-架构设计与任务拆解.md",
+          "../../全栈开发Prompt Chain/prompts/08-全栈实现与TDD.md",
+          "../../全栈开发Prompt Chain/prompts/09-AI-Eval与质量安全.md",
+          "../../全栈开发Prompt Chain/prompts_ask/05-领域模型与产品规格.md",
+          "../../全栈开发Prompt Chain/prompts_ask/06-原型与UX验证.md",
+          "../../全栈开发Prompt Chain/prompts_ask/07-架构设计与任务拆解.md",
+          "../../全栈开发Prompt Chain/prompts_ask/08-全栈实现与TDD.md",
+          "../../全栈开发Prompt Chain/prompts_ask/09-AI-Eval与质量安全.md"
+        ]
+      },
+      "artifacts": [
+        {"path": "templates/user/codex/AGENTS.md", "status": "implemented"},
+        {"path": "templates/project/codex/AGENTS.md", "status": "implemented"},
+        {"path": "templates/modules/frontend-visual-quality.md", "status": "implemented"},
+        {"path": "evals/tasks/05-frontend-visual-quality.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/05-领域模型与产品规格.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/06-原型与UX验证.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/07-架构设计与任务拆解.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/08-全栈实现与TDD.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/09-AI-Eval与质量安全.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/05-领域模型与产品规格.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/06-原型与UX验证.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/07-架构设计与任务拆解.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/08-全栈实现与TDD.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/09-AI-Eval与质量安全.md", "status": "implemented"}
+      ],
+      "eval_cases": ["EVAL-05"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Brand or design-system changes, platform accessibility requirement changes, or behavior evals showing excessive weakening or misclassification require review."
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+---
+description: 项目目录结构、文件分类、命名与落盘规则
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# 项目结构规则
+
+## 根目录极简
+
+根目录只允许项目入口文件、系统级配置文件和标准顶层目录。
+
+通常允许：
+
+- README.md
+- CLAUDE.md
+- .gitignore
+- 依赖与构建配置文件
+- src/
+- scripts/
+- sql/
+- configs/
+- docs/
+- tests/
+- assets/
+- drafts/
+- tmp/
+- archive/
+
+不要把以下内容直接放到根目录：
+
+- 业务文档
+- 草稿
+- 截图
+- 分析结果
+- 临时脚本
+- 中间文件
+- 一次性输出
+
+---
+
+## 四层状态隔离
+
+所有文件都必须属于以下一种状态：
+
+- 正式资产
+- 草稿
+- 临时产物
+- 归档材料
+
+禁止混放：
+
+- 草稿不得进入正式目录
+- 临时产物不得进入正式目录
+- 归档材料不得与当前活跃内容混放
+
+---
+
+## 标准目录结构
+
+默认目录结构如下：
+
+```text
+project-root/
+├─ README.md
+├─ CLAUDE.md
+├─ .gitignore
+├─ src/
+├─ scripts/
+├─ sql/
+├─ configs/
+├─ docs/
+│  ├─ product/
+│  ├─ architecture/
+│  ├─ api/
+│  ├─ workflows/
+│  └─ knowledge/
+├─ tests/
+├─ assets/
+│  ├─ images/
+│  └─ diagrams/
+├─ drafts/
+│  ├─ docs/
+│  ├─ analysis/
+│  ├─ scripts/
+│  └─ ideas/
+├─ tmp/
+│  ├─ outputs/
+│  ├─ screenshots/
+│  ├─ debug/
+│  └─ scratch/
+└─ archive/
+   ├─ docs/
+   ├─ experiments/
+   ├─ scripts/
+   └─ snapshots/

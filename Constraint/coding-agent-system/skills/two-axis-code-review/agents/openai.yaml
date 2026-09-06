@@ -1,0 +1,4 @@
+interface:
+  display_name: "Two-Axis Code Review"
+  short_description: "Review code against standards and the spec"
+  default_prompt: "Use $two-axis-code-review to review this change independently against repository standards and the source specification."

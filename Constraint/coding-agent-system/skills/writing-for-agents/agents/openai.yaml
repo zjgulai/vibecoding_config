@@ -1,0 +1,4 @@
+interface:
+  display_name: "Writing for Agents"
+  short_description: "Create or audit precise instructions for agents"
+  default_prompt: "Use $writing-for-agents to audit these agent instructions for behavioral value, evidence, placement, duplication, and conflicts."

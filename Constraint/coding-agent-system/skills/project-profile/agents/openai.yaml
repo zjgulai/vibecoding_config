@@ -1,0 +1,6 @@
+interface:
+  display_name: "Project Profile"
+  short_description: "Build or audit a repository evidence profile"
+  default_prompt: "Use $project-profile to audit this repository's project profile and report whether it is ready for agent use."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,4 @@
+# This project entry is intentionally comments-only.
+# Keep stable behavior rules in ../AGENTS.md.
+# Configure approval_policy and sandbox_mode in the user or managed organization
+# layer so this project cannot weaken a stricter personal or organizational policy.

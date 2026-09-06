@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "generated_on": "2026-08-30",
+  "purpose": "Lock third-party skill research inputs without installing or vendoring them.",
+  "policy": {
+    "allowed_decisions": [
+      "adopt",
+      "adapt",
+      "exclude"
+    ],
+    "adopt_policy": "No complete third-party skill is adopted verbatim. The project design requires a reviewed rewrite before inclusion.",
+    "execution_boundary": "No repository script was run, no package was installed, and no external issue tracker or Git-mutating operation was invoked; repository metadata was inspected read-only."
+  },
+  "repositories": [
+    {
+      "id": "mattpocock-skills-upstream",
+      "role": "upstream-method-source",
+      "repository_url": "https://github.com/mattpocock/skills.git",
+      "commit": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "accessed_on": "2026-08-29",
+      "license": {
+        "name": "MIT",
+        "license_file": "LICENSE",
+        "copyright": "Copyright (c) 2026 Matt Pocock"
+      }
+    },
+    {
+      "id": "mattpocock-skills-zh-cn",
+      "role": "chinese-reference-source",
+      "repository_url": "https://github.com/vinvcn/mattpocock-skills-zh-CN.git",
+      "commit": "9fb0161ac2be0c45c59cbea0878eb77d92cc24b5",
+      "accessed_on": "2026-08-29",
+      "license": {
+        "name": "MIT",
+        "license_file": "LICENSE",
+        "copyright": "Copyright (c) 2026 Matt Pocock"
+      },
+      "relationship": "Chinese-language reference checkout supplied for comparison; it is not treated as an authoritative upstream replacement."
+    }
+  ],
+  "decisions": [
+    {
+      "candidate": "research",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "skills/technical-research",
+      "reason": "Keep primary-source evidence and claim traceability; remove mandatory background-agent dispatch and automatic repository-note creation, then distinguish facts, inferences, and unknowns."
+    },
+    {
+      "candidate": "tdd",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "tdd",
+      "reason": "Keep red-green feedback discipline; align seam confirmation and commands with the target repository rather than copying source wording."
+    },
+    {
+      "candidate": "diagnosing-bugs",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "systematic-debugging",
+      "reason": "Keep reproducible feedback-loop and evidence-first diagnosis; retain this project's no-secret and authorization boundaries."
+    },
+    {
+      "candidate": "code-review",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "two-axis-code-review",
+      "reason": "Reuse the separation of specification and standards review as an independently rewritten rubric."
+    },
+    {
+      "candidate": "writing-for-agents",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "writing-for-agents",
+      "reason": "Reuse the context-budget and progressive-disclosure concerns, rewritten with verified platform differences."
+    },
+    {
+      "candidate": "grilling and grill-with-docs",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "product-discovery",
+      "reason": "Keep explicit clarification and domain-language capture; do not force interviews or write ADRs without authorization."
+    },
+    {
+      "candidate": "to-spec",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "specification",
+      "reason": "Keep scope, decisions, test strategy and exclusions; remove issue-tracker publication and label mutation."
+    },
+    {
+      "candidate": "to-tickets",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "vertical-ticketing",
+      "reason": "Keep vertical slices and blocking-edge reasoning; remove tracker writes and external state changes."
+    },
+    {
+      "candidate": "prototype",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "safe-prototyping",
+      "reason": "Keep question-led, throwaway experiments; remove the requirement to commit or create branches."
+    },
+    {
+      "candidate": "domain-modeling",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "skills/domain-modeling",
+      "reason": "Keep shared-language clarification, scenario checks, code comparison, and the three-condition ADR threshold; require authorization before creating or changing context and ADR records."
+    },
+    {
+      "candidate": "codebase-design",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "skills/codebase-design",
+      "reason": "Keep deep-module vocabulary and interface/seam analysis; reject seams justified only by a hypothetical single implementation and make design alternatives optional rather than mandatory parallel work."
+    },
+    {
+      "candidate": "improve-codebase-architecture",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "skills/architecture-review",
+      "reason": "Keep bounded hotspot analysis, evidence-backed candidates, and stated recommendation strength; remove automatic history-wide scanning, HTML artifact generation, follow-up workflow control, and repository side effects."
+    },
+    {
+      "candidate": "implement",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "adapt",
+      "target": "skills/implementation-orchestration",
+      "reason": "Keep confirmed-spec work organized into verified small batches and route TDD, debugging, and review at appropriate seams; remove automatic commit, issue-tracker mutation, and execution beyond confirmed authorization."
+    },
+    {
+      "candidate": "setup-matt-pocock-skills, triage, wizard, setup-pre-commit, git-guardrails-claude-code",
+      "source_repository": "mattpocock-skills-upstream",
+      "decision": "exclude",
+      "target": null,
+      "reason": "They depend on installation, external trackers, hooks, credential provisioning, Git state changes, or a specific tool ecosystem outside this task's authorized scope."
+    }
+  ],
+  "adopted_verbatim": []
+}

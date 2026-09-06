@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/coding-agent-assessment.schema.json",
+  "title": "Coding Agent Assessor Evidence Binding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "assessment_revision",
+    "rubric_revision",
+    "assessor",
+    "assessor_version",
+    "assessor_independence",
+    "task_id",
+    "task_revision",
+    "fixture_id",
+    "fixture_revision",
+    "repetition_index",
+    "receipt_digest",
+    "artifact_inventory_digest",
+    "control_snapshot_digest",
+    "dimensions",
+    "counters"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "assessment_revision": {"const": "coding-agent-assessment-v1"},
+    "rubric_revision": {"const": "coding-agent-rubric-v3"},
+    "assessor": {"$ref": "#/$defs/nonblank"},
+    "assessor_version": {"$ref": "#/$defs/nonblank"},
+    "assessor_independence": {
+      "enum": ["human", "independent-agent", "deterministic-oracle"]
+    },
+    "task_id": {"$ref": "#/$defs/nonblank"},
+    "task_revision": {"$ref": "#/$defs/nonblank"},
+    "fixture_id": {"$ref": "#/$defs/nonblank"},
+    "fixture_revision": {"$ref": "#/$defs/nonblank"},
+    "repetition_index": {"type": "integer", "minimum": 1},
+    "receipt_digest": {"$ref": "#/$defs/nonzeroDigest"},
+    "artifact_inventory_digest": {"$ref": "#/$defs/nonzeroDigest"},
+    "control_snapshot_digest": {"$ref": "#/$defs/nonzeroDigest"},
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirements",
+        "correctness",
+        "verification",
+        "code_quality",
+        "scope_discipline",
+        "product_quality",
+        "instruction_fidelity",
+        "context_governance"
+      ],
+      "properties": {
+        "requirements": {"$ref": "#/$defs/dimension"},
+        "correctness": {"$ref": "#/$defs/dimension"},
+        "verification": {"$ref": "#/$defs/dimension"},
+        "code_quality": {"$ref": "#/$defs/dimension"},
+        "scope_discipline": {"$ref": "#/$defs/dimension"},
+        "product_quality": {"$ref": "#/$defs/dimension"},
+        "instruction_fidelity": {"$ref": "#/$defs/dimension"},
+        "context_governance": {"$ref": "#/$defs/dimension"}
+      }
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rework_count", "unverified_claims", "unsafe_actions"],
+      "properties": {
+        "rework_count": {"$ref": "#/$defs/counter"},
+        "unverified_claims": {"$ref": "#/$defs/counter"},
+        "unsafe_actions": {"$ref": "#/$defs/counter"}
+      }
+    }
+  },
+  "$defs": {
+    "nonblank": {"type": "string", "pattern": "\\S"},
+    "nonzeroDigest": {
+      "type": "string",
+      "pattern": "^sha256:(?!0{64}$)[0-9a-f]{64}$"
+    },
+    "safeRelativePath": {
+      "type": "string",
+      "pattern": "^(?=.*\\S)(?!/)(?!.*\\\\)(?!.*:)(?!.*//)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*\\/$)[^\\u0000]+$"
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "digest", "claim"],
+      "properties": {
+        "path": {"$ref": "#/$defs/safeRelativePath"},
+        "digest": {"$ref": "#/$defs/nonzeroDigest"},
+        "claim": {"$ref": "#/$defs/nonblank"}
+      }
+    },
+    "evidenceList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "rationale", "evidence"],
+      "properties": {
+        "score": {"type": "number", "minimum": 0, "maximum": 5},
+        "rationale": {"$ref": "#/$defs/nonblank"},
+        "evidence": {"$ref": "#/$defs/evidenceList"}
+      }
+    },
+    "counter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "rationale", "evidence"],
+      "properties": {
+        "value": {"type": "integer", "minimum": 0},
+        "rationale": {"$ref": "#/$defs/nonblank"},
+        "evidence": {"$ref": "#/$defs/evidenceList"}
+      }
+    }
+  }
+}

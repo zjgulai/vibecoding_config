@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "generated_on": "2026-08-29",
+  "purpose": "Lock external research-method inputs without installing, vendoring, or executing their code.",
+  "policy": {
+    "allowed_decisions": [
+      "adapt",
+      "exclude"
+    ],
+    "reuse_boundary": "Method concepts may be cited and independently rewritten. Repository code, instruction text, datasets, and experiment results are not copied or represented as project capabilities without a separately verified license and explicit review.",
+    "execution_boundary": "No repository script, training workload, package installation, or autonomous experiment was run. Repository metadata and pinned text files were inspected read-only."
+  },
+  "repositories": [
+    {
+      "id": "karpathy-autoresearch",
+      "role": "method-inspiration-source",
+      "repository_url": "https://github.com/karpathy/autoresearch.git",
+      "commit": "228791fb499afffb54b46200aca536f79142f117",
+      "commit_date": "2026-03-26T00:07:37Z",
+      "accessed_on": "2026-08-29",
+      "license": {
+        "readme_declaration": "MIT",
+        "license_file": null,
+        "github_license_metadata": null,
+        "verified_grant": false,
+        "note": "At the pinned commit, README.md ends with an MIT label, but the repository contains no LICENSE, LICENSE.md, LICENSE.txt, COPYING, or equivalent license text. This project does not treat the label alone as permission to copy code or long-form instructions."
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "candidate": "bounded autonomous experiment loop",
+      "source_repository": "karpathy-autoresearch",
+      "decision": "adapt",
+      "target": "Auto Research evaluation protocol/control plane",
+      "adapted_concepts": [
+        "fix the experiment scope and evaluation seam before a run",
+        "establish a baseline before changing one experimental variable",
+        "record every attempt, including crashes and discarded variants",
+        "compare against a fixed metric and retain or reject changes explicitly",
+        "use a stopping condition and keep raw evidence"
+      ],
+      "excluded_material": [
+        "single-GPU language-model training code",
+        "prepare.py and train.py implementation",
+        "program.md wording and indefinite-loop instruction",
+        "autoresearch datasets, metrics, logs, and performance claims",
+        "automatic Git branch, commit, or reset behavior"
+      ],
+      "reason": "The bounded edit-run-measure-keep/discard loop is relevant to controlled Coding Agent configuration comparisons, but the training implementation, autonomy policy, and repository license evidence do not transfer to this project."
+    }
+  ],
+  "adopted_verbatim": []
+}

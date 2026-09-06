@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codebase Design"
+  short_description: "Design deep modules and useful seams"
+  default_prompt: "Use $codebase-design to evaluate this module boundary, interface, seam, and any adapter trade-offs for leverage and locality."

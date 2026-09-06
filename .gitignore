@@ -1,0 +1,27 @@
+# OS and editor metadata
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# JavaScript dependencies and build output
+node_modules/
+coverage/
+dist/
+build/
+
+# Local logs and secrets
+*.log
+.env
+.env.*
+!.env.example

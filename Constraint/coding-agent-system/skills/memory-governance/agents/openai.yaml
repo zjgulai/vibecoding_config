@@ -1,0 +1,6 @@
+interface:
+  display_name: "Memory Governance"
+  short_description: "Review durable memory candidates before promotion"
+  default_prompt: "Use $memory-governance to review these memory candidates for evidence, scope, conflicts, expiry, and privacy."
+policy:
+  allow_implicit_invocation: false

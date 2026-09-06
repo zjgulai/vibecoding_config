@@ -1,0 +1,22 @@
+# SDD ledger — plan: 全栈开发Prompt Chain/docs/superpowers/plans/2026-09-02-ui-visual-restraint-integration.md
+
+- Environment: `/Users/lute/Project/vibecoding_config` is not a Git repository; worktree, commits and Git diff packages are unavailable. This run uses task briefs, implementer reports, exact file scopes, before/after SHA-256 and independent read-only reviews.
+- Preflight: clean — no unresolved conflict between the approved design and implementation plan.
+- Approved exception: Codex user adapter may carry the user-confirmed conditional UI preference outside the shared core; shared core and non-Codex adapters remain unchanged.
+- Task 1 implementation: content requirements 1–6 passed; template dry-run unchanged; `validate .` returned `VALID`.
+- Task 1 review: `Approved with documented exception`. Four protected non-target files lack independent pre-edit hashes; current target identity and all 31 protected-file hashes were freshly verified. This historical gap remains unsatisfied/unverifiable and is not represented as compliance.
+- Task 1 evidence repair: stale native/readable byte evidence corrected; target content was not changed during repair.
+- Task 2 implementation: EVAL-05, CLI SOP, LOC-030, TIP-077 and RUL-022 traceability completed; JSON parse, `validate .`, path/set checks and 117 unit tests passed.
+- Task 2 review: PASS after one Minor wording fix (`原始 76 条` versus later `TIP-077`); no Critical or Important findings.
+- Filesystem evidence note: five edited Markdown files expose different pathname and logical-readable views in this workspace. Both are recorded without inferring a cause; final normalization is deferred until content freeze.
+- Task 3 implementation: original M05–M09 UI stage projections completed; source, semantic and preservation checks passed.
+- Task 3 review: PASS after one Important authorization fix in M08. Visual verification now explicitly does not authorize unapproved tool installation/invocation and retains `Visual verification: not run`.
+- Task 4 implementation: dialogue M05–M09, workflow, CLI manual and controller projections completed; 13 prompts retained 104/104 common headings and all static checks passed.
+- Task 4 review: PASS after one Important M07 mirror fix. G3 decision, G4 local-write authorization and separate dependency/external authorization are now explicit.
+- Task 5 preflight: corrected the final validation plan for fail-fast execution, exact stage oracles, 31-file protected comparison, 22-file content freeze/normalization, four-view checks and per-file manifest. The corrected Step 3 script returned `FINAL_PROMPT_CONTRACT=PASS`; all five shell blocks passed syntax validation.
+- Task 5 implementation: final 22-file content freeze passed; the initial normalization wave touched 21 Markdown files and the final-review fix wave touched only the three authorized paths. A complete rerun produced zero further normalization and no temporary residue.
+- Task 5 validation: `VALID`; isolated generated-project route and module identity passed; `FINAL_PROMPT_CONTRACT=PASS`; 117 tests passed in the independent rerun; `PROTECTED_MANIFEST=PASS files=31`; `FOUR_VIEW_ALL=PASS files=22`; `UTF8_FENCES=PASS markdown=21`.
+- Final reviews: rules/accessibility PASS, Prompt lifecycle PASS after the M09 `A05/A06/A07/A08` trace fix, platform/authorization PASS, and independent Task 5 evidence review PASS. Final findings: 0 Critical / 0 Important / 0 Minor.
+- Final manifest: `f5a32aba4983f54bdfb9aea737a44ff969b1ee4c11b003f07dd37fa9cbafd107`.
+- Retained limitations: four Task 1 protected files lack independent pre-edit hashes; real browser/visual regression/real-agent behavior was not run; `EVAL-05` remains contract-only; the directory is not a Git repository and no commit was created.
+- Status: complete with documented evidence limitations. Final report: `全栈开发Prompt Chain/docs/superpowers/sdd/2026-09-02-ui-visual-restraint-integration/final-review-report.md`.

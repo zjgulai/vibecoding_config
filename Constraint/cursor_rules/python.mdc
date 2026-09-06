@@ -1,0 +1,10 @@
+### python脚本遵循以下规范和方法
+- 变量、方法命名不要用复数，命名使用对应类型结尾，比如：_dict, _list 等
+- 关键节点打印日志，使用封装的方法 from common.lute_logger import setup_logger
+	- 初始化：logger = setup_logger(__name__)
+- csv\excel 操作使用封装的方法 from common import lute_file：
+	- 导出：lute_file.export_csv(dict_list, filename)
+	- 读取：lute_file.read_csv(filename)  返回dict_list
+- 数据库操作使用封装的方法： 
+	- 查询：mysql_instance().execute_query(sql)
+	- 操作：mysql_instance().batch_upsert(database, table, dict_list)

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Vertical Ticketing"
+  short_description: "Split work into verifiable vertical tickets"
+  default_prompt: "Use $vertical-ticketing to split this approved specification into independently verifiable vertical tickets and blocking edges."
+policy:
+  allow_implicit_invocation: false

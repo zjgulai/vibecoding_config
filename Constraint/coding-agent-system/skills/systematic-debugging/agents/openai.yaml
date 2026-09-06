@@ -1,0 +1,4 @@
+interface:
+  display_name: "Systematic Debugging"
+  short_description: "Debug through reproducible, falsifiable evidence"
+  default_prompt: "Use $systematic-debugging to reproduce this failure, test falsifiable hypotheses, and report the evidence-backed root cause."

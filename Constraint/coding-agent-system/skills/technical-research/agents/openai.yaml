@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technical Research"
+  short_description: "Research technical facts from primary sources"
+  default_prompt: "Use $technical-research to verify these technical claims from authoritative primary sources and separate facts, inferences, and unknowns."

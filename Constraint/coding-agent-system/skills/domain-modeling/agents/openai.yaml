@@ -1,0 +1,4 @@
+interface:
+  display_name: "Domain Modeling"
+  short_description: "Clarify shared language and domain boundaries"
+  default_prompt: "Use $domain-modeling to clarify the shared language, test these domain terms with scenarios and code evidence, and identify any genuine ADR-worthy decisions."

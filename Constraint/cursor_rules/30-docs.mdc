@@ -1,0 +1,42 @@
+---
+description: Markdown 文档、知识库、工作流与产品文档规则
+globs:
+  - "**/*.md"
+alwaysApply: true
+---
+
+# 文档规则
+
+## 文档分类
+
+Markdown 文档必须先判断类型，再决定落盘位置：
+
+- 产品文档 → docs/product/
+- 工作流文档 → docs/workflows/
+- 知识文档 → docs/knowledge/
+- 架构文档 → docs/architecture/
+- API 文档 → docs/api/
+- 草稿文档 → drafts/docs/
+- 分析文档 → drafts/analysis/
+- 历史旧文档 → archive/docs/
+
+不要把所有 .md 文件混放在一个目录。
+
+---
+
+## 元信息要求
+
+新建正式或草稿 Markdown 文档时，必须包含元信息头：
+
+```md
+---
+title: 文档标题
+doc_type: prd | workflow | api | architecture | knowledge | analysis | other
+module: 模块名
+topic: 主题名
+status: draft | review | stable | deprecated | archived
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+owner: self
+source: human | ai | human+ai
+---

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Architecture Review"
+  short_description: "Review scoped architecture friction and options"
+  default_prompt: "Use $architecture-review to assess this specified hotspot, present evidence-backed architecture candidates, and recommend only what the evidence supports."
+policy:
+  allow_implicit_invocation: false

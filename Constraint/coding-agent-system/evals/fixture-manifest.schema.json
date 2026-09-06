@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/coding-agent-fixture-manifest.schema.json",
+  "title": "Coding Agent Representative Fixture Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_revision",
+    "digest_contract",
+    "fixtures"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "manifest_revision": {"type": "string", "pattern": "\\S"},
+    "digest_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "excluded_paths",
+        "generation_command",
+        "validation_command",
+        "validation_timing"
+      ],
+      "properties": {
+        "algorithm": {"const": "sha256-tree-v2"},
+        "excluded_paths": {"const": [".git/**"]},
+        "generation_command": {
+          "const": [
+            "python3",
+            "evals/validate_fixture.py",
+            "--digest",
+            "<fixture-root>"
+          ]
+        },
+        "validation_command": {
+          "const": [
+            "python3",
+            "evals/validate_fixture.py",
+            "<manifest-path>"
+          ]
+        },
+        "validation_timing": {
+          "const": "after_reset_and_setup_before_each_repetition"
+        }
+      }
+    },
+    "fixtures": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/fixture"},
+      "allOf": [
+        {"contains": {"properties": {"task_id": {"const": "01-product-discovery"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "02-vertical-full-stack-feature"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "03-systematic-debugging"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "04-postgresql-migration"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "05-frontend-visual-quality"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "06-two-axis-review"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "07-instruction-audit"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "08-project-profile"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "09-memory-governance"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "10-instruction-conflict"}}, "required": ["task_id"]}},
+        {"contains": {"properties": {"task_id": {"const": "11-local-rule-linked-change"}}, "required": ["task_id"]}}
+      ]
+    }
+  },
+  "$defs": {
+    "argv": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "pattern": "\\S"}
+    },
+    "safeRelativePath": {
+      "type": "string",
+      "pattern": "^(?=.*\\S)(?!/)(?!.*\\\\)(?!.*:)(?!.*//)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*\\/$)[^\\u0000]+$"
+    },
+    "commandContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "expected_exit_code",
+        "timeout_seconds",
+        "success_condition"
+      ],
+      "properties": {
+        "command": {"$ref": "#/$defs/argv"},
+        "expected_exit_code": {"const": 0},
+        "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 3600},
+        "success_condition": {"type": "string", "pattern": "\\S"}
+      }
+    },
+    "oracleContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "expected_exit_code",
+        "timeout_seconds",
+        "pass_condition"
+      ],
+      "properties": {
+        "command": {"$ref": "#/$defs/argv"},
+        "expected_exit_code": {"const": 0},
+        "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 3600},
+        "pass_condition": {"type": "string", "pattern": "\\S"}
+      }
+    },
+    "artifactItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind", "non_empty", "description"],
+      "properties": {
+        "path": {"$ref": "#/$defs/safeRelativePath"},
+        "kind": {"enum": ["file", "directory", "glob"]},
+        "non_empty": {"type": "boolean"},
+        "description": {"type": "string", "pattern": "\\S"}
+      }
+    },
+    "artifactContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root_template", "required", "forbidden"],
+      "properties": {
+        "root_template": {
+          "const": "artifacts/<task-id>/<configuration-revision>/<repetition-index>"
+        },
+        "required": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/artifactItem"}
+        },
+        "forbidden": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/safeRelativePath"}
+        }
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_id",
+        "task_revision",
+        "fixture_id",
+        "fixture_revision",
+        "readiness",
+        "root",
+        "setup",
+        "reset",
+        "oracle",
+        "artifacts",
+        "initial_state_digest"
+      ],
+      "properties": {
+        "task_id": {
+          "enum": [
+            "01-product-discovery",
+            "02-vertical-full-stack-feature",
+            "03-systematic-debugging",
+            "04-postgresql-migration",
+            "05-frontend-visual-quality",
+            "06-two-axis-review",
+            "07-instruction-audit",
+            "08-project-profile",
+            "09-memory-governance",
+            "10-instruction-conflict",
+            "11-local-rule-linked-change"
+          ]
+        },
+        "task_revision": {"type": "string", "pattern": "\\S"},
+        "fixture_id": {"type": "string", "pattern": "\\S"},
+        "fixture_revision": {"type": "string", "pattern": "\\S"},
+        "readiness": {"enum": ["ready", "contract-only"]},
+        "root": {"$ref": "#/$defs/safeRelativePath"},
+        "setup": {
+          "allOf": [
+            {"$ref": "#/$defs/commandContract"},
+            {"properties": {"command": {"const": ["./fixture-control", "setup"]}}}
+          ]
+        },
+        "reset": {
+          "allOf": [
+            {"$ref": "#/$defs/commandContract"},
+            {"properties": {"command": {"const": ["./fixture-control", "reset"]}}}
+          ]
+        },
+        "oracle": {
+          "allOf": [
+            {"$ref": "#/$defs/oracleContract"},
+            {
+              "properties": {
+                "command": {
+                  "const": ["./fixture-control", "oracle", "--artifacts", "<artifact-root>"]
+                }
+              }
+            }
+          ]
+        },
+        "artifacts": {"$ref": "#/$defs/artifactContract"},
+        "initial_state_digest": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"readiness": {"const": "ready"}},
+            "required": ["readiness"]
+          },
+          "then": {
+            "properties": {
+              "initial_state_digest": {
+                "type": "string",
+                "pattern": "^sha256:(?!0{64}$)[0-9a-f]{64}$"
+              }
+            }
+          },
+          "else": {
+            "properties": {"initial_state_digest": {"type": "null"}}
+          }
+        }
+      ]
+    }
+  }
+}

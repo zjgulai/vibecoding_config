@@ -1,0 +1,6 @@
+interface:
+  display_name: "Specification"
+  short_description: "Turn settled context into an implementable spec"
+  default_prompt: "Use $specification to turn the settled requirements and repository facts into an implementable, testable specification."
+policy:
+  allow_implicit_invocation: false

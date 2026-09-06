@@ -1,0 +1,4 @@
+interface:
+  display_name: "Safe Prototyping"
+  short_description: "Answer one design question with disposable code"
+  default_prompt: "Use $safe-prototyping to answer this single design question with the smallest isolated and disposable experiment."

@@ -1,0 +1,59 @@
+
+---
+
+### **40-frontend.mdc**
+
+```md
+---
+description: 前端开发规则
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.css"
+alwaysApply: true
+---
+
+# 前端开发规则
+
+## 技术偏好
+
+- TypeScript 优先
+- strict: true
+- React 19 + Next.js 15
+- Tailwind CSS
+- Zustand > Redux
+- 简单状态优先 Context
+- 函数组件 + Hooks
+- pnpm
+- Vitest
+- ESLint + Prettier
+
+---
+
+## 编码规则
+
+- 优先函数组件 + Hooks
+- 避免类组件
+- 优先现代 ES6+ 语法
+- 避免过度抽象
+- 三行重复代码通常优于过早抽象
+- 组件职责保持单一
+
+---
+
+## 样式规则
+
+- 优先 Tailwind CSS
+- 避免 inline style
+- 避免样式定义散乱
+
+---
+
+## 文件规则
+
+- 正式前端代码进入 src/
+- 草稿页面、实验组件不要直接进入正式区
+- 临时实验内容进入 drafts/ 或 tmp/
+- 新建文件前先判断是否应并入已有组件或模块
