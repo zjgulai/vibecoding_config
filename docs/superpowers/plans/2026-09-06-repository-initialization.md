@@ -31,7 +31,7 @@
 - Consumes: 根目录现有 .DS_Store、各子目录 .DS_Store、现有 ZIP 快照。
 - Produces: 适用于本仓库的忽略策略；被 Git 追踪的 archive/全栈开发Prompt Chain.zip；未更名的两个内容根。
 
-- [ ] **Step 1: 创建最小 .gitignore**
+- [x] **Step 1: 创建最小 .gitignore**
 
 写入以下规则：
 
@@ -65,7 +65,7 @@ build/
 !.env.example
 ~~~
 
-- [ ] **Step 2: 移动 ZIP 而不改动其内容**
+- [x] **Step 2: 移动 ZIP 而不改动其内容**
 
 运行：
 
@@ -76,7 +76,7 @@ git mv '全栈开发Prompt Chain.zip' 'archive/全栈开发Prompt Chain.zip'
 
 预期：根目录不存在原 ZIP；archive/全栈开发Prompt Chain.zip 存在；Constraint/ 与 全栈开发Prompt Chain/ 仍位于原路径。
 
-- [ ] **Step 3: 验证忽略规则与归档范围**
+- [x] **Step 3: 验证忽略规则与归档范围**
 
 运行：
 
@@ -93,7 +93,7 @@ test -d '全栈开发Prompt Chain'
 
 预期：.DS_Store 显示由 .gitignore 忽略；ZIP 不被忽略；两个内容根存在。
 
-- [ ] **Step 4: 提交受管内容、卫生规则与归档快照**
+- [x] **Step 4: 提交受管内容、卫生规则与归档快照**
 
 运行：
 
@@ -117,7 +117,7 @@ git commit -m 'chore: initialize repository content and archive snapshot'
 - Consumes: 两个内容根的既有入口、平台边界、验证边界和归档快照。
 - Produces: 中文根 README，提供仓库定位、内容地图、四种使用入口、平台范围、验证边界、版本约定和归档链接。
 
-- [ ] **Step 1: 写入 README 内容**
+- [x] **Step 1: 写入 README 内容**
 
 README 必须包含以下章节：
 
@@ -144,7 +144,7 @@ README 必须包含以下章节：
 
 README 把 Claude Code 表述为兼容资料，把 Cursor 表述为规则设计参考；不得承诺真实平台已加载、测试或优于其他工作流。
 
-- [ ] **Step 2: 验证 README 的必需入口与本地链接**
+- [x] **Step 2: 验证 README 的必需入口与本地链接**
 
 运行：
 
@@ -159,7 +159,7 @@ test -e 'archive/全栈开发Prompt Chain.zip'
 
 预期：README 包含七个既定章节；所有本地入口均存在。
 
-- [ ] **Step 3: 提交根 README**
+- [x] **Step 3: 提交根 README**
 
 运行：
 
@@ -182,7 +182,7 @@ git commit -m 'docs: add repository overview and navigation'
 - Consumes: 当前 main 提交树、既有配置工具、README 与忽略规则。
 - Produces: 可复核的本地验证结果；如有失败，记录准确的失败原因且不伪称通过。
 
-- [ ] **Step 1: 运行配置系统静态校验**
+- [x] **Step 1: 运行配置系统静态校验**
 
 运行：
 
@@ -194,7 +194,7 @@ python3 tools/agent_system.py validate .
 
 预期：两条命令退出码为 0；render-templates 只输出渲染映射，不改写快照。
 
-- [ ] **Step 2: 运行配置系统单元测试**
+- [x] **Step 2: 运行配置系统单元测试**
 
 运行：
 
@@ -205,7 +205,7 @@ python3 -m unittest discover -s tools/tests -v
 
 预期：测试进程退出码为 0，且没有失败或错误。
 
-- [ ] **Step 3: 审计 Git 内容与对象完整性**
+- [x] **Step 3: 审计 Git 内容与对象完整性**
 
 从仓库根运行：
 
@@ -228,7 +228,7 @@ git status --short
 - Consumes: 本地 main、用户指定 URL https://github.com/zjgulai/vibecoding_config.git、已通过 Task 3 的本地提交树。
 - Produces: origin/main 指向与本地 HEAD 相同的首个可复核提交。
 
-- [ ] **Step 1: 只读确认远端状态**
+- [x] **Step 1: 只读确认远端状态**
 
 运行：
 
@@ -238,7 +238,7 @@ git ls-remote --heads https://github.com/zjgulai/vibecoding_config.git
 
 预期：空仓库不返回分支行；若返回 main 或其他分支，停止并比较提交历史，不覆盖远端。
 
-- [ ] **Step 2: 配置远端并推送 main**
+- [x] **Step 2: 配置远端并推送 main**
 
 运行：
 
@@ -249,7 +249,7 @@ git push -u origin main
 
 预期：GitHub 接受首个 main 分支；不使用 --force、--mirror 或删除参数。
 
-- [ ] **Step 3: 交叉核验远端提交和干净状态**
+- [x] **Step 3: 交叉核验远端提交和干净状态**
 
 运行：
 
