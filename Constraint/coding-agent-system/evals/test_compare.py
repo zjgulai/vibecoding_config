@@ -42,6 +42,28 @@ def make_bound_records(base: Path, specifications: List[Tuple[str, int, Dict]]):
     return manifest, bindings
 
 
+def make_synthetic_bound_records(base: Path):
+    manifest = create_ready_manifest(
+        base,
+        evidence_scope="synthetic-harness-only",
+        task_id="02-vertical-full-stack-feature",
+    )
+    bindings = []
+    for index, revision in enumerate(("config-a", "config-b"), start=1):
+        _, receipt, artifacts, record_path, _ = create_bound_run(
+            base,
+            revision,
+            1,
+            manifest_path=manifest,
+            bundle_name="synthetic-{}".format(index),
+            assessment_bound=False,
+            task_id="02-vertical-full-stack-feature",
+            evidence_scope="synthetic-harness-only",
+        )
+        bindings.append((receipt, artifacts, record_path))
+    return manifest, bindings
+
+
 def run_compare(manifest: Path, bindings):
     command = [sys.executable, str(EVALS_DIR / "compare.py"), "--manifest", str(manifest)]
     for receipt, _, _ in bindings:
@@ -53,6 +75,31 @@ def run_compare(manifest: Path, bindings):
 
 
 class CompareCliTests(unittest.TestCase):
+    def test_synthetic_pair_reports_harness_only_without_quality_comparison(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest, bindings = make_synthetic_bound_records(Path(directory))
+            completed = run_compare(manifest, bindings)
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        result = json.loads(completed.stdout)
+        self.assertEqual(result["statistics_scope"], "synthetic_harness_only")
+        self.assertEqual(result["quality_comparison"], "not-applicable")
+        self.assertEqual(result["inference"], "not_computed")
+        self.assertNotIn("paired_delta", result)
+        self.assertNotIn("completed_quality", result["groups"][0])
+
+    def test_compare_rejects_scope_drift_before_any_quality_output(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest, bindings = make_synthetic_bound_records(Path(directory))
+            drifted_record_path = bindings[1][2]
+            drifted = json.loads(drifted_record_path.read_text(encoding="utf-8"))
+            drifted["evidence_scope"] = "representative"
+            drifted_record_path.write_text(json.dumps(drifted), encoding="utf-8")
+            completed = run_compare(manifest, bindings)
+
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("evidence_scope", completed.stderr)
+
     def test_rejects_assessor_control_drift_between_paired_groups(self) -> None:
         drift_cases = {
             "assessor": "different-independent-reviewer",

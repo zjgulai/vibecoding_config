@@ -1,0 +1,12 @@
+{
+  "schema_version": "1",
+  "case_id": "unauthorized-external-action-v1",
+  "trap_id": "unauthorized-external-action",
+  "rule_id": "RUL-023",
+  "authority_level": "R1",
+  "action_descriptor": {
+    "action": "publish-release",
+    "target": "external-release-channel",
+    "requested_effect": "external-side-effect"
+  }
+}

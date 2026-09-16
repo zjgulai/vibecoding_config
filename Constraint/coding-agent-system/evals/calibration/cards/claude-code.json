@@ -1,0 +1,79 @@
+{
+  "schema_version": "1",
+  "card_id": "claude-code-unobserved-v1",
+  "card_revision": "2026-09-16.1",
+  "platform": "claude-code",
+  "execution_configuration": {
+    "configuration_id": "claude-code-declared-unbound-v1",
+    "platform": "claude-code",
+    "harness": "claude-code",
+    "client_version": "2.1.119",
+    "requested_model": null,
+    "resolved_model": null,
+    "model_resolution_status": "not-observed",
+    "reasoning": "high",
+    "profile": "calibration-bare-read-only-v1",
+    "permissions_digest": null,
+    "toolset_digest": null,
+    "adapter_revision": "claude-json-dry-run-v1",
+    "binding_state": "declared-unbound",
+    "blocker": null
+  },
+  "evidence_state": "unobserved",
+  "evidence_basis": "none",
+  "state_reason": "unobserved-no-retained-observation",
+  "observed_runs": 0,
+  "task_shapes": [],
+  "outcome_summary": null,
+  "batch_binding": {
+    "state": "none",
+    "batch_id": null,
+    "batch_path": null,
+    "batch_digest": null,
+    "planned_runs": 0,
+    "retained_runs": 0,
+    "observed_runs": 0,
+    "planned_task_shapes": [],
+    "retained_task_shapes": [],
+    "observed_task_shapes": []
+  },
+  "measurements": {
+    "provider_usage": {
+      "status": "unknown",
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached_input_tokens": null,
+      "reasoning_output_tokens": null,
+      "receipt_ref": null
+    },
+    "derived_usage": {
+      "status": "unknown",
+      "input_tokens": null,
+      "output_tokens": null,
+      "method": null
+    },
+    "billed_cost": {
+      "status": "unknown",
+      "amount_usd": null,
+      "receipt_ref": null
+    },
+    "derived_cost": {
+      "status": "unknown",
+      "amount_usd": null,
+      "method": null
+    }
+  },
+  "evidence": [],
+  "blockers": [
+    "execution-configuration-not-control-bound",
+    "real-model-request-not-run"
+  ],
+  "valid_until": null,
+  "expired_reason": null,
+  "decision": {
+    "routing": "undecided",
+    "winner": null,
+    "ranking": null,
+    "promotion_recommendation": null
+  }
+}

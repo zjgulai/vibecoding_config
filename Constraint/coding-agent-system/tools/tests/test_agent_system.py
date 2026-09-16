@@ -243,6 +243,12 @@ class AgentSystemTests(unittest.TestCase):
             "---\ntitle: Ref ledger\n---\n\n| REF-001 | fixture |\n",
         )
         self._write(
+            "report-source.md",
+            "---\ntitle: Fixture research sources\ndoc_type: knowledge\n"
+            "module: coding-agent-system\ntopic: research-sources\n"
+            "status: draft\n---\n\n| RSP-001 | fixture |\n",
+        )
+        self._write(
             "sources/rule-traceability.json",
             json.dumps(
                 {
@@ -1393,6 +1399,7 @@ class AgentSystemTests(unittest.TestCase):
         value = json.loads(trace.read_text(encoding="utf-8"))
         rule = value["rules"][0]
         rule["sources"].append("LOC-999")
+        rule["sources"].append("RSP-999")
         rule["artifacts"].append(
             {"path": "templates/shared/missing.md", "status": "implemented"}
         )
@@ -1402,8 +1409,21 @@ class AgentSystemTests(unittest.TestCase):
         issues = agent_system.validate_system(self.root)
 
         self.assertTrue(any("unknown traceability source" in issue for issue in issues))
+        self.assertIn("unknown traceability source: RSP-999", issues)
         self.assertTrue(any("implemented traceability artifact is missing" in issue for issue in issues))
         self.assertTrue(any("unknown traceability eval" in issue for issue in issues))
+
+    def test_validate_system_accepts_registered_rsp_traceability_source(self) -> None:
+        trace = self.root / "sources/rule-traceability.json"
+        value = json.loads(trace.read_text(encoding="utf-8"))
+        value["rules"][0]["sources"] = ["RSP-001"]
+        trace.write_text(json.dumps(value), encoding="utf-8")
+
+        issues = agent_system.validate_system(self.root)
+
+        self.assertFalse(
+            any("unknown traceability source" in issue for issue in issues), issues
+        )
 
     def test_validate_system_allows_planned_missing_traceability_artifact(self) -> None:
         trace = self.root / "sources/rule-traceability.json"

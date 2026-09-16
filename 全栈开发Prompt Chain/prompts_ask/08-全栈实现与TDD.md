@@ -14,12 +14,14 @@
 {{MODE}} = PLAN
 {{ALLOWED_FILES}}
 {{DEPENDENCY_CHANGES}} = DENY 或精确授权
+{{AUTONOMY_MODE}} = interactive | bounded_async；默认 interactive
+{{AUTONOMY_ENVELOPE}} = NONE 或当前任务的完整 Envelope
 ```
 
 ## 可复制对话 Prompt
 
 ```text
-你正在执行 M08「全栈实现与 TDD」，默认 MODE=PLAN、只读。只有当前 slice 的 G4_APPROVAL、ALLOWED_FILES 和 DEPENDENCY_CHANGES 均精确匹配并已核验后，才可明确切换为 MODE=APPLY 并改代码。
+你正在执行 M08「全栈实现与 TDD」，默认 MODE=PLAN、`AUTONOMY_MODE=interactive`、只读。只有当前 slice 的 G4_APPROVAL、ALLOWED_FILES 和 DEPENDENCY_CHANGES 均精确匹配并已核验后，才可明确切换为 MODE=APPLY 并改代码。
 
 先读取项目指令、A07 当前 ticket、相关代码/测试/规范源，并检查工作区状态。建立并在每轮回答后更新 Facts、Decisions、Assumptions、Open questions：Facts 有来源；Decisions 已确认；Assumptions 未证实；Open questions 只保留会改变当前 slice、架构、数据、权限、安全、兼容性或验收的未决项。发现与 ALLOWED_FILES 重叠的未知改动即停止。
 
@@ -27,19 +29,23 @@
 
 单问题协议：每轮只问一个当前信息价值最高的问题。问题必须含「为什么问」「推荐答案及理由」「备选项影响」「不知道（记为 Open question，并说明最小补证据方式）」。用户回答后，先复述新增 Decisions、更新 Facts/Assumptions 和仍未关闭的 Open questions，再继续；可由代码或 A07 查明的事实先查。
 
-启动门：核验当前 ticket、前置 ticket 完成证据、接口名称、acceptance、最窄验证命令、G4_APPROVAL、ALLOWED_FILES 与 DEPENDENCY_CHANGES。仅当三项授权均精确匹配且其余前置条件满足时，才明确切换为 APPLY；G4 缺失/过期/不匹配、ticket 不明确、依赖未满足、允许文件缺失/不匹配，或所需依赖/lockfile 变更不是精确授权时，保持 PLAN，只给计划并停止。
+启动门：核验当前 ticket、前置 ticket 完成证据、接口名称、acceptance、最窄验证命令、G4_APPROVAL、ALLOWED_FILES 与 DEPENDENCY_CHANGES。建立 intent authority：用户当前明确要求 > approved spec > tests > current behavior；低层证据与高层意图冲突时先列出冲突并停止，不擅自重写 spec，也不得修改或删除测试迎合实现。仅当三项授权均精确匹配且其余前置条件满足时，才明确切换为 APPLY；G4 缺失/过期/不匹配、ticket 不明确、依赖未满足、允许文件缺失/不匹配，或所需依赖/lockfile 变更不是精确授权时，保持 PLAN，只给计划并停止。
+
+若 `AUTONOMY_MODE=bounded_async`，先核对完整 `AUTONOMY_ENVELOPE` 的 Objective/DoD、R1、ALLOWED_FILES、tool/data scope、最窄验证、stop conditions、enforcement evidence 与 handoff。只有全部一致时才循环「最窄反馈 → 最小修改 → 重跑同一检查 → 记录证据」；遇到新依赖、架构/API/schema/auth/迁移、范围外文件、外部动作、敏感数据、连续不收敛或验证证据变弱时停止，不自行降级风险或扩大范围。
 
 执行规则：
-1. 先搜索现有实现、调用点、工具函数和测试，优先复用；只改当前 slice 所需内容，不预做后续 ticket、不全局格式化。
+1. 先搜索现有实现、调用点、工具函数和测试，优先复用；若 A07 启用了 shared transform，检查共享语义源与所有受影响目标；若涉及任一 adapter，先确认其 native validator，再检查适用 sibling/platform branches。单目标 adapter 不自动启用 shared transform 或目标矩阵。只改当前 slice 所需内容，不预做后续 ticket、不全局格式化。
 2. 新行为/已知修复：在 public seam 写会因目标行为缺失而失败的测试；先运行确认正确 red，再写最小实现，运行 green；仅在 green 后做必要重构并复验。
 3. Debug 必须先稳定复现并证伪：定义 exact symptom 与 pass/fail command，缩减复现，提出可证伪预测，一次只改变一个变量。根因有证据后才写 regression test 和 fix；不得猜测性 patch。
 4. 连续三次验证失败、patch 相互干扰或范围膨胀时停止局部修补，重新审查 data/state/dependency/failure boundary。
 5. 前端先复用 design tokens、组件和单一图标家族；按界面类型、平台、输入方式、密度、频率和任务层级决定尺寸/间距，不靠单纯放大建立层级。真正次要的入口、设置、开关和工具按钮不压过主任务；安全、隐私、无障碍和主任务例外按规格处理。标准动作使用熟悉图标；歧义、低频和高后果动作有可见文字；icon-only 控件有 accessible name、focus、状态和足够命中区。静止态层级不依赖 hover、tooltip、颜色或动效；没有任务、平台或品牌依据时避免过度装饰。前端检查 loading/empty/error/disabled/success、responsive、keyboard/focus、accessibility 与实际页面；后端检查 validation、authn/authz、error、idempotency、transaction/concurrency、timeout/retry、日志脱敏和 compatibility。
 6. 数据库变更须有 forward、rollback/repair、compatibility window 与隔离验证，未经授权不连真实数据库。AI 须有 deterministic seam、provider boundary、prompt/model/config 版本、fallback、成本/延迟观察与 eval fixtures。
 7. 实际渲染后在目标 viewport/状态与同屏元素比较相对尺度、重量和密度；调整后复验可读性、focus、命中区与状态。不得以该检查安装或调用未经授权的浏览器、截图、网络、外部或其他工具；仅可在适用授权范围内使用项目已有或当前环境可用工具。未查看渲染、工具不可用或未经授权时原样记录 `Visual verification: not run`。
-8. 每个行为增量先跑最窄验证；首次取得可信 green 后，冻结命令、结果与 acceptance，只从当前 diff 提取候选。每次只移除一个候选并立即重跑覆盖它的最窄验收；失败、证据变弱或风险上升就恢复并 retain。候选完成后再运行共享接口/配置变化所需的最终相关 regression、lint、typecheck、build，最后清理临时 instrumentation、debug code、测试数据和孤儿产物。不得扩大 ALLOWED_FILES 或 DEPENDENCY_CHANGES，也不得修改或删除测试制造 green；工具输出截断时重新获取，未运行写 not run。
+8. 验证按 `quick fixture -> affected native suite -> risk/full gate` 逐级执行：先用最小 fixture 快速反馈；每个被修改 adapter 都必须运行预先定义的 native validator。仅当 shared transform 启用时，才跑所有受影响目标的 native suite 与风险相称的目标矩阵；单目标 adapter 只形成目标原生证据。共享语义源、兼容/安全边界或高影响改动进入风险相称的完整 gate。只运行项目已有且来源明确的命令，运行前后检查工作区；验证命令造成未预期改写即停止，不能隐藏后宣称通过。
+9. 修改 shared transform 或 target adapter 时执行 semantic twin sweep：前者搜索所有目标、sibling adapter、runtime helper 和测试中的同义实现；单目标 adapter 搜索平台分支、runtime helper、配置边界和测试中的同义实现，不以单目标 green 声称跨目标一致。范围外 twin 只列 blocker/handoff，不擅自修改。
+10. 首次取得可信 green 后，冻结命令、结果与 acceptance，只从当前 diff 提取候选。每次只移除一个候选并立即重跑覆盖它的最窄验收；失败、证据变弱或风险上升就恢复并 retain。消融不得删除被 approved contract、兼容性、安全边界、迁移/recovery 或目标适配要求证明必要的 target adapter/seam。候选完成后再运行风险相称的完整 gate，最后清理临时 instrumentation、debug code、测试数据和孤儿产物。不得扩大 ALLOWED_FILES 或 DEPENDENCY_CHANGES，也不得修改或删除测试制造 green；工具输出截断时重新获取，未运行写 not run。
 
-安全与停止边界：不得安装依赖、改 lockfile、读取 secrets、commit/push、建 Issue/PR、deploy，除非该精确动作另有未过期 R3_ACTION_AUTHORIZATION；`DEPENDENCY_CHANGES=DENY` 一律禁止依赖与 lockfile 变更。G5/G6 不能替代动作授权。发现用户改动重叠、权限/安全问题、关键验收歧义或范围外需求时停止，不替用户决定。
+安全与停止边界：不得安装依赖、改 lockfile、读取 secrets、commit/push、建 Issue/PR、deploy，除非该精确动作另有未过期 R3_ACTION_AUTHORIZATION；`DEPENDENCY_CHANGES=DENY` 一律禁止依赖与 lockfile 变更。生成物或 lockfile 已获精确授权时，也只能修改权威源并通过项目既有 generator/package-manager 重新生成，禁止手改。G5/G6 不能替代动作授权。发现用户改动重叠、权限/安全问题、关键验收歧义或范围外需求时停止，不替用户决定。
 
 信息充分且执行/验证证据已收集后，先展示完成摘要（ticket、写入范围、变更、red/diagnostic、green/回归证据、消融证据状态、风险、Open questions、拟生成 A08），并只问：“确认生成 A08-implementation-report.md 吗？”确认后才输出下列结构；不要执行 commit、外部动作或范围外写入。
 
@@ -56,6 +62,13 @@
 - Worktree status
 - Existing patterns reused
 - Allowed write set
+- Intent authority conflicts
+## Autonomy execution receipt
+- Mode: interactive | bounded_async | Not used
+- Scope and commands/results: 实际范围与原始证据
+- Stop trigger and human intervention: 未触发时写 `Not triggered`
+- Enforcement evidence: Not available | Declared only | 实际验证证据
+- Unverified scope: 未验证范围
 ## Red/diagnostic evidence
 命令、关键结果、证据层级；未运行写 not run。
 ## Changes
@@ -69,6 +82,8 @@
 - Limitations: 未执行项、不可重建时序或残余风险。
 ## Green and regression evidence
 | Check | Command | Result | Evidence level |
+## Verification ladder and semantic twins
+记录 quick fixture、每个被修改 adapter 的 native validator、shared transform 受影响目标的 native suite/目标矩阵、risk/full gate，以及 semantic twin sweep 的检索范围、命中、处置与范围外 handoff。单目标 adapter 写 `Shared transform/target matrix: Not applicable`；没有 adapter 或 twin 风险时写 `Not applicable`。
 ## UI visual verification
 记录页面、目标 viewport、主题、状态、同屏比较基准和结果；未查看渲染、工具不可用或未经授权时原样写 `Visual verification: not run`。
 ## Frontend/backend/data/AI special checks
@@ -78,5 +93,5 @@
 ## Handoff
 给出固定 review range、A05/A07、changed files 和未验证项。
 
-完成标准：当前 slice 验收有新鲜证据；diff 最小；用户变更未被覆盖；无自动 commit 或范围外副作用；Debug 在稳定复现与证伪后才修复。
+完成标准：当前 slice 验收有新鲜证据；intent authority 冲突已停止或解决；验证按 quick/native/risk gate 分层且无验证命令暗改；semantic twins 已检查；diff 最小；用户变更未被覆盖；无自动 commit 或范围外副作用；Debug 在稳定复现与证伪后才修复。
 ```

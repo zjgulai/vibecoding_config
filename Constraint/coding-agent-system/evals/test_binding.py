@@ -18,8 +18,17 @@ from test_fixture_manifest import make_manifest
 EVALS_DIR = Path(__file__).resolve().parent
 
 
-def create_ready_manifest(base: Path) -> Path:
-    manifest = make_manifest(readiness="ready")
+def create_ready_manifest(
+    base: Path,
+    *,
+    evidence_scope: str = "representative",
+    task_id: str = "03-systematic-debugging",
+) -> Path:
+    manifest = make_manifest(readiness="ready", evidence_scope=evidence_scope)
+    if evidence_scope == "synthetic-harness-only":
+        manifest["fixtures"] = [
+            fixture for fixture in manifest["fixtures"] if fixture["task_id"] == task_id
+        ]
     for index, fixture in enumerate(manifest["fixtures"], start=1):
         root = base / "fixture-{}".format(index)
         root.mkdir()
@@ -47,8 +56,14 @@ def create_bound_run(
     manifest_path: Path = None,
     bundle_name: str = None,
     assessment_bound: bool = True,
+    task_id: str = "03-systematic-debugging",
+    evidence_scope: str = "representative",
 ):
-    manifest_path = manifest_path or create_ready_manifest(base)
+    manifest_path = manifest_path or create_ready_manifest(
+        base,
+        evidence_scope=evidence_scope,
+        task_id=task_id,
+    )
     configuration_root = base / "configurations" / configuration_revision
     configuration_root.mkdir(parents=True, exist_ok=True)
     config_file = configuration_root / "AGENTS.md"
@@ -66,7 +81,7 @@ def create_bound_run(
     )
     receipt, success = run_lifecycle.run_lifecycle(
         manifest_path,
-        "03-systematic-debugging",
+        task_id,
         configuration_revision,
         configuration_root,
         repetition,
@@ -97,6 +112,7 @@ def create_bound_run(
         "initial_state_digest": receipt["fixture_initial_digest"],
         "manifest_revision": receipt["manifest_revision"],
         "manifest_digest": receipt["manifest_digest"],
+        "evidence_scope": receipt["evidence_scope"],
         "agent": snapshot["agent"],
         "agent_version": snapshot["agent_version"],
         "model": snapshot["model"],
@@ -317,6 +333,18 @@ class BindingTests(unittest.TestCase):
 
         self.assertNotEqual(completed.returncode, 0)
         self.assertIn("control_snapshot", completed.stderr)
+
+    def test_record_evidence_scope_drift_is_rejected_against_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest, receipt, artifacts, record_path, record = create_bound_run(
+                Path(directory)
+            )
+            record["evidence_scope"] = "synthetic-harness-only"
+            record_path.write_text(json.dumps(record), encoding="utf-8")
+            completed = run_score(manifest, receipt, artifacts, record_path)
+
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("evidence_scope", completed.stderr)
 
     def test_assessment_requires_evidence_for_every_dimension(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

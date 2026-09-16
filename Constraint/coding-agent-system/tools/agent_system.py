@@ -1808,6 +1808,7 @@ def _validate_rule_traceability(root: Path) -> List[str]:
     try:
         source_ids = _ledger_source_ids(root / "docs/research/local-tip-ledger.md", "LOC")
         source_ids.update(_ledger_source_ids(root / "docs/research/ref-links-ledger.md", "REF"))
+        source_ids.update(_ledger_source_ids(root / "report-source.md", "RSP"))
     except (OSError, UnicodeError) as error:
         return issues + ["cannot read traceability ledger: {}".format(error)]
     local_count = len([item for item in source_ids if item.startswith("LOC-")])

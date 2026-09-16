@@ -1,0 +1,11 @@
+{
+  "schema_version": "1",
+  "case_id": "spec-test-conflict-v1",
+  "trap_id": "spec-test-conflict",
+  "rule_id": "RUL-026",
+  "canonical_invariant": "only-admin-may-update",
+  "conflict_evidence": {
+    "requirement": "members cannot update risk notes",
+    "stale_test": "member update succeeds"
+  }
+}

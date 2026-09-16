@@ -26,6 +26,7 @@ from eval_protocol import (
     safe_relative_posix_path,
     sha256_file,
     validate_digest,
+    validate_evidence_scope,
 )
 from receipt import verify_receipt_binding
 from validate_fixture import find_fixture, validate_manifest_structure
@@ -50,6 +51,7 @@ REQUIRED_FIELDS = (
     "initial_state_digest",
     "manifest_revision",
     "manifest_digest",
+    "evidence_scope",
     "agent",
     "agent_version",
     "model",
@@ -136,6 +138,7 @@ def validate_record(record: Mapping) -> None:
     ):
         nonblank(record[key], key)
     _validate_enum(record, "fixture_readiness", FIXTURE_READINESS_VALUES)
+    validate_evidence_scope(record["evidence_scope"], "evidence_scope")
     _validate_enum(record, "agent", AGENTS)
     _validate_enum(record, "reasoning_effort", REASONING_EFFORTS)
     _validate_enum(record, "profile", PROFILES)
@@ -209,6 +212,11 @@ def validate_record(record: Mapping) -> None:
     if record["fixture_readiness"] == "contract-only":
         if control_binding != "declared" or assessment_binding != "declared":
             raise ValueError("contract-only records must keep controls and assessment declared")
+    if record["evidence_scope"] == "synthetic-harness-only":
+        if assessment_binding != "declared":
+            raise ValueError(
+                "evidence_scope=synthetic-harness-only records must not bind an assessor assessment"
+            )
 
     evidence = record["evidence"]
     if not isinstance(evidence, list) or not evidence:
@@ -236,6 +244,21 @@ def validate_record(record: Mapping) -> None:
         raise ValueError("stopped or failed records cannot claim perfect scores")
 
 
+def _efficiency(record: Mapping, control_bound: bool) -> Dict[str, object]:
+    input_tokens = record["input_tokens"]
+    output_tokens = record["output_tokens"]
+    return {
+        "duration_seconds": record["duration_seconds"] if control_bound else None,
+        "input_tokens": input_tokens if control_bound else None,
+        "output_tokens": output_tokens if control_bound else None,
+        "total_tokens": (
+            input_tokens + output_tokens
+            if control_bound and input_tokens is not None and output_tokens is not None
+            else None
+        ),
+    }
+
+
 def _compute_score(
     record: Mapping,
     *,
@@ -243,6 +266,26 @@ def _compute_score(
     control_bound: bool = False,
     assessment_bound: bool = False,
 ) -> Dict:
+    mechanically_eligible = execution_bound and record["run_status"] == "completed"
+    if record["evidence_scope"] == "synthetic-harness-only":
+        return {
+            "scope_result": "synthetic-harness-only",
+            "quality_score": None,
+            "penalty": None,
+            "final_score": None,
+            "declared_quality_score": None,
+            "declared_penalty": None,
+            "declared_final_score": None,
+            "completed_quality_eligible": False,
+            "mechanically_eligible": mechanically_eligible,
+            "execution_bound": execution_bound,
+            "control_bound": control_bound,
+            "assessment_bound": assessment_bound,
+            "promotion_eligible": False,
+            "failed_hard_gates": [],
+            "efficiency": _efficiency(record, control_bound),
+        }
+
     scores = record["scores"]
     weighted = sum(
         (float(scores[dimension]) / 5.0) * weight * 100.0
@@ -266,11 +309,9 @@ def _compute_score(
     else:
         score_cap = 100.0
     final_score = min(ungated, score_cap)
-    input_tokens = record["input_tokens"]
-    output_tokens = record["output_tokens"]
-    mechanically_eligible = execution_bound and record["run_status"] == "completed"
     quality_bound = control_bound and assessment_bound
     return {
+        "scope_result": "representative",
         "quality_score": round(weighted, 2) if quality_bound else None,
         "penalty": round(penalty, 2) if quality_bound else None,
         "final_score": round(final_score, 2) if quality_bound else None,
@@ -289,28 +330,8 @@ def _compute_score(
         "declared_failed_hard_gates": failed_hard_gates,
         "score_cap": score_cap if quality_bound else None,
         "declared_score_cap": score_cap,
-        "efficiency": {
-            "duration_seconds": record["duration_seconds"] if control_bound else None,
-            "input_tokens": input_tokens if control_bound else None,
-            "output_tokens": output_tokens if control_bound else None,
-            "total_tokens": (
-                input_tokens + output_tokens
-                if control_bound
-                and input_tokens is not None
-                and output_tokens is not None
-                else None
-            ),
-        },
-        "declared_efficiency": {
-            "duration_seconds": record["duration_seconds"],
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-            "total_tokens": (
-                input_tokens + output_tokens
-                if input_tokens is not None and output_tokens is not None
-                else None
-            ),
-        },
+        "efficiency": _efficiency(record, control_bound),
+        "declared_efficiency": _efficiency(record, True),
     }
 
 
@@ -414,6 +435,7 @@ def verify_record_binding(
     verify_receipt_binding(receipt, manifest_path, manifest, fixture, artifact_root)
 
     bindings = {
+        "evidence_scope": receipt["evidence_scope"],
         "task_revision": fixture["task_revision"],
         "fixture_revision": fixture["fixture_revision"],
         "initial_state_digest": fixture["initial_state_digest"],

@@ -5,7 +5,7 @@ module: coding-agent-system
 topic: research-sources
 status: stable
 created: 2026-08-29
-updated: 2026-09-06
+updated: 2026-09-15
 owner: self
 source: human+ai
 ---
@@ -63,14 +63,19 @@ source: human+ai
 | RSP-033 | [Shao Meng：产物链与人工门](https://x.com/shao__meng/status/2095034431614677320)（[公开镜像](https://api.fxtwitter.com/status/2095034431614677320)）；[代码、知识与认知债](https://x.com/shao__meng/status/2094027833505144919)（[公开镜像](https://api.fxtwitter.com/status/2094027833505144919)）；[AI Native SDLC](https://x.com/shao__meng/status/2093990789584236857)（[公开镜像](https://api.fxtwitter.com/status/2093990789584236857)） | Shao Meng | 2026-09-06 | 本轮通过公开镜像读取三条短帖正文；原始 X 页面与链接长文未作为正文证据。仅支持作者提出的工作流框架，不支持平台事实或效果结论。 |
 | RSP-034 | [Agentic Engineering Patterns](https://simonwillison.net/guides/agentic-engineering-patterns/)；[What is agentic engineering?](https://simonwillison.net/2025/Jun/6/what-is-agentic-engineering/)；[Code is cheap](https://simonwillison.net/2025/Mar/11/cheaper-than-human-thinking/)；[Hoard things you know how to do](https://simonwillison.net/2025/Mar/11/hoard-things-you-know-how-to-do/)；[Better code](https://simonwillison.net/2025/Mar/15/better-code/)；[Anti-patterns](https://simonwillison.net/2025/Jun/7/agentic-engineering-anti-patterns/) | Simon Willison | 2026-09-06 | Agentic engineering 的作者方法论：工具/执行/验证循环、人类目标与验证责任、已验证样例的复用和代码便宜不等于质量成本消失。 |
 | RSP-035 | [Claude Code features overview](https://code.claude.com/docs/en/features-overview)；[Hooks reference](https://code.claude.com/docs/en/hooks)；[Configure permissions](https://code.claude.com/docs/en/permissions) | Anthropic | 2026-09-06 | 项目上下文、hooks 与 permissions 的当前机制边界；仅支持官方页面明确写出的机制，不支持跨平台等价或真实运行效果。 |
+| RSP-036 | [Frontier Engineering](https://kiro.dev/topics/frontier-engineering/)；[Maximize Agent Time](https://kiro.dev/topics/frontier-engineering/maximize-agent-time/)；[Build for Agents](https://kiro.dev/topics/frontier-engineering/build-for-agents/)；[Fast Feedback Loop](https://kiro.dev/topics/frontier-engineering/fast-feedback-loop/)；[Trust the Boundaries](https://kiro.dev/topics/frontier-engineering/trust-the-boundaries/) | Kiro | 2026-09-11 | 有界自主、快速反馈、代码库准备、边界优先和持续调优的作者方法论。该来源不支持平台机制、默认权限、生产自治或生产率效果结论。 |
+| RSP-037 | 用户提供、受访问控制的飞书 AI 智能纪要，revision 6；公开仓库中省略 tenant URL、文档 ID 与完整内容摘要 | 用户工作区资料 | 2026-09-15 | `Chat → Prompt → Skill → Workflow → RAG` 故事线、TUI/CLI 能力验证、Skill 评测与多模型协作的叙述来源。主纪要已读；关联原始 transcript 无权限，因此不能核验逐字上下文，也不支持因果效果或固定模型分工。 |
+| RSP-038 | [fable-compiler/Fable @ 5d62380](https://github.com/fable-compiler/Fable/tree/5d62380cb30dc1080c6943445a256e27db6246f8)；[AGENTS.md](https://github.com/fable-compiler/Fable/blob/5d62380cb30dc1080c6943445a256e27db6246f8/AGENTS.md)；[Pipeline.fs](https://github.com/fable-compiler/Fable/blob/5d62380cb30dc1080c6943445a256e27db6246f8/src/Fable.Cli/Pipeline.fs)；[build workflow](https://github.com/fable-compiler/Fable/blob/5d62380cb30dc1080c6943445a256e27db6246f8/.github/workflows/build.yml) | Fable contributors | 2026-09-15 | 多阶段转换、共享核心与目标 adapter、reference + target-native 测试、quicktest/矩阵验证、生成物与 lockfile 纪律。MIT；仅迁移工程概念，不引入 F# 或编译器技术栈。 |
+| RSP-039 | [Sahir619/fable-method @ 88b5cf3](https://github.com/Sahir619/fable-method/tree/88b5cf36b10ee3679e08ee0f0181b9774d481508)；[`fable-method`](https://github.com/Sahir619/fable-method/blob/88b5cf36b10ee3679e08ee0f0181b9774d481508/skills/fable-method/SKILL.md)；[`fable-loop`](https://github.com/Sahir619/fable-method/blob/88b5cf36b10ee3679e08ee0f0181b9774d481508/skills/fable-loop/SKILL.md)；[`fable-judge`](https://github.com/Sahir619/fable-method/blob/88b5cf36b10ee3679e08ee0f0181b9774d481508/skills/fable-judge/SKILL.md)；[`fable-domain`](https://github.com/Sahir619/fable-method/blob/88b5cf36b10ee3679e08ee0f0181b9774d481508/skills/fable-domain/SKILL.md) | Sahir619 | 2026-09-15 | ask-shape、named done/verification、intent authority、语义 twin、只读 claim 裁决和 trap-first Skill 演进。MIT、社区萃取、非 Anthropic 官方；小样本合成/LLM-judge 结果只作 smoke，负结果一并保留。 |
 
 ## 使用规则
 
 - RSP-001 至 RSP-005、RSP-009 至 RSP-016、RSP-018 至 RSP-025、RSP-030 与 RSP-031 是平台行为与字段级结论的第一方证据；它们只支持文中明确写出的机制，不支持真实客户端运行结果。
 - RSP-006 是待迁移材料，不是平台事实的证据。RSP-027 至 RSP-029、RSP-032 只记录审计、取舍与追踪，也不能替代平台第一方证据；涉及产品行为时，必须回到相应官方来源。
-- RSP-033 是动态社交短帖的作者框架，且本轮只有公开镜像的短帖正文可复核；不得把它升级为平台事实、外链长文内容或效果证据。RSP-034 支持作者的方法论，RSP-035 支持 Anthropic 页面明确写出的 Claude Code 机制；两者均不替代本项目真实任务验证。
+- RSP-033 是动态社交短帖的作者框架，且本轮只有公开镜像的短帖正文可复核；不得把它升级为平台事实、外链长文内容或效果证据。RSP-034 与 RSP-036 支持作者的方法论，RSP-035 支持 Anthropic 页面明确写出的 Claude Code 机制；三者均不替代本项目真实任务验证。
 - RSP-007 与 RSP-008 仅支持 skill 方法来源、许可证和处理决定；本项目不整包安装，也不把其 README 或 `SKILL.md` 当作规范正文复制。
 - RSP-026 只支持 Auto Research 的方法灵感与来源边界。本项目没有运行或复制该仓库；README 的 `MIT` 标签没有独立许可证文本佐证，不作为代码或长文本复用许可。
 - RSP-004、RSP-005、RSP-018 与 RSP-026 已固定到本轮只读审计 commit；这保证证据可复核，不表示已安装客户端与该 commit 一致。RSP-009 至 RSP-016、RSP-019 至 RSP-025 属于动态平台资料；正式升级前必须重新读取当前版本。
 - RSP-017 只证明本项目生成器、校验器和评测控制面在本地与隔离临时目录中的行为，不证明 Codex 或 DSH 已加载生成配置或在代表性任务上更优；Claude 产物仅作兼容性回归。
+- RSP-037 是二手 AI 纪要，不是原始 transcript；故事和作者经验只能生成待验证假设。RSP-038 是成熟实现仓库，可支持其代码与工程约束的事实；RSP-039 是社区方法仓库，其结构检查通过不证明方法有效。三者没有已核验的隶属或方法继承关系。
 - 页面未显示发布日期时，ledger 记录为「页面未标示」；访问日期不是发布日期。

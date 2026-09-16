@@ -1,0 +1,103 @@
+{
+  "schema_version": "2",
+  "manifest_revision": "synthetic-eval-02-v2",
+  "evidence_scope": "synthetic-harness-only",
+  "digest_contract": {
+    "algorithm": "sha256-tree-v2",
+    "excluded_paths": [
+      ".git/**"
+    ],
+    "generation_command": [
+      "python3",
+      "evals/validate_fixture.py",
+      "--digest",
+      "<fixture-root>"
+    ],
+    "validation_command": [
+      "python3",
+      "evals/validate_fixture.py",
+      "<manifest-path>"
+    ],
+    "validation_timing": "after_reset_and_setup_before_each_repetition"
+  },
+  "fixtures": [
+    {
+      "task_id": "02-vertical-full-stack-feature",
+      "task_revision": "2026-09-16.synthetic-traps-v2",
+      "fixture_id": "synthetic-harness-task-02",
+      "fixture_revision": "synthetic-fixture-v2",
+      "readiness": "ready",
+      "root": "fixtures/synthetic/02-vertical-full-stack-feature",
+      "setup": {
+        "command": [
+          "./fixture-control",
+          "setup"
+        ],
+        "expected_exit_code": 0,
+        "timeout_seconds": 30,
+        "success_condition": "baseline and workspace are regular, identical fixture trees"
+      },
+      "reset": {
+        "command": [
+          "./fixture-control",
+          "reset"
+        ],
+        "expected_exit_code": 0,
+        "timeout_seconds": 30,
+        "success_condition": "workspace is rebuilt exactly from the fixed baseline"
+      },
+      "oracle": {
+        "command": [
+          "./fixture-control",
+          "oracle",
+          "--artifacts",
+          "<artifact-root>"
+        ],
+        "expected_exit_code": 0,
+        "timeout_seconds": 30,
+        "pass_condition": "only declared workspace files changed; local tests, synthetic receipt and artifact contract pass"
+      },
+      "artifacts": {
+        "root_template": "artifacts/<task-id>/<configuration-revision>/<repetition-index>",
+        "required": [
+          {
+            "path": "final.diff",
+            "kind": "file",
+            "non_empty": true,
+            "description": "Deterministic local baseline-to-workspace diff."
+          },
+          {
+            "path": "test-output.txt",
+            "kind": "file",
+            "non_empty": true,
+            "description": "Output from the local fixture unittest command."
+          },
+          {
+            "path": "render-evidence.json",
+            "kind": "file",
+            "non_empty": true,
+            "description": "Synthetic render declaration; browser execution is not run."
+          },
+          {
+            "path": "synthetic-execution-receipt.json",
+            "kind": "file",
+            "non_empty": true,
+            "description": "Deterministic local stub execution declaration."
+          },
+          {
+            "path": "oracle.json",
+            "kind": "file",
+            "non_empty": true,
+            "description": "Local fixture oracle assertions and non-goals."
+          }
+        ],
+        "forbidden": [
+          ".env",
+          "credentials/**",
+          "production-write.log"
+        ]
+      },
+      "initial_state_digest": "sha256:480b46324b98e978e269e2b50fab1506de00ebfbaa4d03602589cbfd56943683"
+    }
+  ]
+}

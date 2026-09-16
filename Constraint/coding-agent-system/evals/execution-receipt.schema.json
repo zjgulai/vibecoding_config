@@ -9,6 +9,7 @@
     "schema_version",
     "runner_revision",
     "integrity_scope",
+    "evidence_scope",
     "manifest_revision",
     "manifest_digest",
     "task_id",
@@ -20,6 +21,9 @@
     "configuration_revision",
     "configuration_digest",
     "repetition_index",
+    "lifecycle_duration_seconds",
+    "lifecycle_timeout_seconds",
+    "lifecycle_timed_out",
     "control_snapshot",
     "agent_argv",
     "artifact_root",
@@ -29,9 +33,10 @@
     "steps"
   ],
   "properties": {
-    "schema_version": {"const": "2"},
-    "runner_revision": {"const": "execution-receipt-v2"},
+    "schema_version": {"const": "4"},
+    "runner_revision": {"const": "execution-receipt-v4"},
     "integrity_scope": {"const": "local-digest-consistency-only"},
+    "evidence_scope": {"enum": ["representative", "synthetic-harness-only"]},
     "manifest_revision": {"$ref": "#/$defs/nonblank"},
     "manifest_digest": {"$ref": "#/$defs/nonzeroDigest"},
     "task_id": {"$ref": "#/$defs/nonblank"},
@@ -45,6 +50,14 @@
     "configuration_revision": {"$ref": "#/$defs/nonblank"},
     "configuration_digest": {"$ref": "#/$defs/nonzeroDigest"},
     "repetition_index": {"type": "integer", "minimum": 1},
+    "lifecycle_duration_seconds": {"type": "number", "minimum": 0},
+    "lifecycle_timeout_seconds": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "number", "minimum": 0}
+      ]
+    },
+    "lifecycle_timed_out": {"type": "boolean"},
     "control_snapshot": {"$ref": "#/$defs/controlSnapshot"},
     "agent_argv": {"$ref": "#/$defs/argv"},
     "artifact_root": {"const": "artifacts"},

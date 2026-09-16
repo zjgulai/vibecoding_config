@@ -1,6 +1,7 @@
 {
-  "schema_version": "1",
+  "schema_version": "2",
   "manifest_revision": "2026-08-29.2",
+  "evidence_scope": "representative",
   "digest_contract": {
     "algorithm": "sha256-tree-v2",
     "excluded_paths": [".git/**"],

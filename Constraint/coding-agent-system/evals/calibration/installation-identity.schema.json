@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/installation-identity.schema.json",
+  "title": "Locally verified Codex installation identity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "identity_revision",
+    "package_name",
+    "package_version",
+    "package_manifest_digest",
+    "entrypoint_digest",
+    "native_package_name",
+    "native_package_version",
+    "native_package_manifest_digest",
+    "native_binary_digest",
+    "platform",
+    "machine",
+    "identity_digest"
+  ],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "identity_revision": { "const": "codex-installation-identity-v1" },
+    "package_name": { "const": "@openai/codex" },
+    "package_version": { "$ref": "#/$defs/nonblank" },
+    "package_manifest_digest": { "$ref": "#/$defs/digest" },
+    "entrypoint_digest": { "$ref": "#/$defs/digest" },
+    "native_package_name": { "const": "@openai/codex" },
+    "native_package_version": { "$ref": "#/$defs/nonblank" },
+    "native_package_manifest_digest": { "$ref": "#/$defs/digest" },
+    "native_binary_digest": { "$ref": "#/$defs/digest" },
+    "platform": { "$ref": "#/$defs/nonblank" },
+    "machine": { "$ref": "#/$defs/nonblank" },
+    "identity_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "nonblank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

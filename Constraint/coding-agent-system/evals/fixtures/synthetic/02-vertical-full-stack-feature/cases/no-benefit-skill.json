@@ -1,0 +1,14 @@
+{
+  "schema_version": "1",
+  "case_id": "no-benefit-skill-v1",
+  "trap_id": "no-benefit-skill",
+  "rule_id": "RUL-027",
+  "skill": "noop-risk-note-review",
+  "fixed_behavior_result": {
+    "permission_invariant": "preserved",
+    "validated_targets": [
+      "api",
+      "render"
+    ]
+  }
+}

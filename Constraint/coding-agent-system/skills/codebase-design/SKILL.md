@@ -22,6 +22,7 @@ metadata:
 3. 仅当已有真实变化、独立替换需求或明确的隔离价值时引入 adapter/seam。一个单实现的假想替换点不是足以增加抽象的理由。
 4. 若一个依赖簇反复向调用者泄漏知识，按 [references/deepening.md](references/deepening.md) 检查能否把行为收进更 deep 的 module。
 5. 有关键但尚未定型的 interface 取舍时，可选择 design-it-twice：比较两个或更多明显不同的设计，再按 leverage、locality、失败模式与迁移成本选择。它是可选探索，不强制并行分支或多 agent；见 [references/design-alternatives.md](references/design-alternatives.md)。
+6. 只有同一批准规格需要产生两个以上目标表示，或目标间已有可测量的语义漂移风险时，才读取 [references/spec-to-target-pipeline.md](references/spec-to-target-pipeline.md)，评估规范源、共享契约、目标 adapter 与原生 validator。单目标普通应用不为“架构完整”引入中间表示。
 
 ## Completion criterion
 

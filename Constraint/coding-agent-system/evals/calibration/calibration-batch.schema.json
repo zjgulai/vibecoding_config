@@ -1,0 +1,696 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/calibration-batch.schema.json",
+  "title": "Coding agent calibration batch contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "batch_id",
+    "batch_revision",
+    "execution_mode",
+    "purpose",
+    "fixture_binding",
+    "treatment",
+    "fixed_controls",
+    "data_egress",
+    "budget",
+    "authorization",
+    "stop_conditions",
+    "execution_configurations",
+    "invocations",
+    "claims"
+  ],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "batch_id": { "$ref": "#/$defs/nonblank" },
+    "batch_revision": { "$ref": "#/$defs/nonblank" },
+    "execution_mode": {
+      "enum": [
+        "dry-run-only",
+        "authorized-smoke",
+        "authorized-calibration-batch"
+      ]
+    },
+    "purpose": { "$ref": "#/$defs/nonblank" },
+    "fixture_binding": { "$ref": "#/$defs/fixtureBinding" },
+    "treatment": { "$ref": "#/$defs/treatment" },
+    "fixed_controls": { "$ref": "#/$defs/fixedControls" },
+    "data_egress": { "$ref": "#/$defs/dataEgress" },
+    "budget": { "$ref": "#/$defs/budget" },
+    "authorization": { "$ref": "#/$defs/authorization" },
+    "stop_conditions": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/stopCondition" }
+    },
+    "execution_configurations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/executionConfiguration" }
+    },
+    "invocations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/invocation" }
+    },
+    "claims": { "$ref": "#/$defs/claims" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "execution_mode": { "const": "dry-run-only" } },
+        "required": ["execution_mode"]
+      },
+      "then": {
+        "properties": {
+          "fixture_binding": {
+            "properties": { "state": { "const": "unbound" } }
+          },
+          "data_egress": {
+            "properties": {
+              "state": { "const": "none-authorized" },
+              "allowed_payloads": { "maxItems": 0 }
+            }
+          },
+          "budget": {
+            "properties": {
+              "max_cli_invocations": { "const": 0 },
+              "max_wall_clock_seconds": { "const": 0 },
+              "max_billed_cost_usd": { "type": "null" },
+              "billed_cost_limit_source": { "const": "unknown" }
+            }
+          },
+          "authorization": {
+            "properties": {
+              "state": { "const": "dry-run-only" },
+              "authorized_platforms": { "maxItems": 0 },
+              "authorization_ref": { "type": "null" },
+              "expires_at": { "type": "null" }
+            }
+          },
+          "invocations": {
+            "items": {
+              "properties": {
+                "execute": { "const": false },
+                "expected_cli_invocations": { "const": 0 }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonblank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "nullableNonblank": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/nonblank" }
+      ]
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nullableDigest": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/digest" }
+      ]
+    },
+    "safePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    },
+    "nullableSafePath": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/safePath" }
+      ]
+    },
+    "platform": {
+      "enum": ["codex", "claude-code", "deepseek-harness"]
+    },
+    "fixtureBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "manifest_path",
+        "manifest_digest",
+        "task_id",
+        "task_revision",
+        "fixture_id",
+        "fixture_revision",
+        "initial_state_digest",
+        "prompt_digest",
+        "oracle_revision"
+      ],
+      "properties": {
+        "state": { "enum": ["unbound", "bound"] },
+        "manifest_path": { "$ref": "#/$defs/nullableSafePath" },
+        "manifest_digest": { "$ref": "#/$defs/nullableDigest" },
+        "task_id": { "$ref": "#/$defs/nonblank" },
+        "task_revision": { "$ref": "#/$defs/nullableNonblank" },
+        "fixture_id": { "$ref": "#/$defs/nonblank" },
+        "fixture_revision": { "$ref": "#/$defs/nullableNonblank" },
+        "initial_state_digest": { "$ref": "#/$defs/nullableDigest" },
+        "prompt_digest": { "$ref": "#/$defs/nullableDigest" },
+        "oracle_revision": { "$ref": "#/$defs/nullableNonblank" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "state": { "const": "unbound" } },
+            "required": ["state"]
+          },
+          "then": {
+            "properties": {
+              "manifest_path": { "type": "null" },
+              "manifest_digest": { "type": "null" },
+              "task_revision": { "type": "null" },
+              "fixture_revision": { "type": "null" },
+              "initial_state_digest": { "type": "null" },
+              "prompt_digest": { "type": "null" },
+              "oracle_revision": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "manifest_path": { "$ref": "#/$defs/safePath" },
+              "manifest_digest": { "$ref": "#/$defs/digest" },
+              "task_revision": { "$ref": "#/$defs/nonblank" },
+              "fixture_revision": { "$ref": "#/$defs/nonblank" },
+              "initial_state_digest": { "$ref": "#/$defs/digest" },
+              "prompt_digest": { "$ref": "#/$defs/digest" },
+              "oracle_revision": { "$ref": "#/$defs/nonblank" }
+            }
+          }
+        }
+      ]
+    },
+    "treatment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "variable",
+        "baseline",
+        "candidate",
+        "comparison_authorized"
+      ],
+      "properties": {
+        "mode": { "enum": ["none", "single-variable"] },
+        "variable": { "$ref": "#/$defs/nullableNonblank" },
+        "baseline": { "type": ["string", "number", "integer", "boolean", "null"] },
+        "candidate": { "type": ["string", "number", "integer", "boolean", "null"] },
+        "comparison_authorized": { "type": "boolean" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "mode": { "const": "none" } },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "variable": { "type": "null" },
+              "baseline": { "type": "null" },
+              "candidate": { "type": "null" },
+              "comparison_authorized": { "const": false }
+            }
+          },
+          "else": {
+            "properties": {
+              "variable": { "$ref": "#/$defs/nonblank" },
+              "baseline": { "not": { "type": "null" } },
+              "candidate": { "not": { "type": "null" } },
+              "comparison_authorized": { "const": true }
+            }
+          }
+        }
+      ]
+    },
+    "fixedControls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repetitions_per_configuration",
+        "workspace_mode",
+        "prompt_source",
+        "web_search_enabled",
+        "browser_enabled",
+        "mcp_enabled",
+        "external_side_effects_enabled",
+        "git_writes_enabled",
+        "retries",
+        "oracle_required",
+        "raw_stdout_required",
+        "raw_stderr_required",
+        "receipt_required",
+        "smoke_observation_required"
+      ],
+      "properties": {
+        "repetitions_per_configuration": { "type": "integer", "minimum": 1 },
+        "workspace_mode": { "const": "read-only" },
+        "prompt_source": { "const": "fixture-only" },
+        "web_search_enabled": { "const": false },
+        "browser_enabled": { "const": false },
+        "mcp_enabled": { "const": false },
+        "external_side_effects_enabled": { "const": false },
+        "git_writes_enabled": { "const": false },
+        "retries": { "const": 0 },
+        "oracle_required": { "const": true },
+        "raw_stdout_required": { "const": true },
+        "raw_stderr_required": { "const": true },
+        "receipt_required": { "const": true },
+        "smoke_observation_required": { "const": true }
+      }
+    },
+    "dataEgress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "allowed_payloads", "forbidden_data"],
+      "properties": {
+        "state": { "enum": ["none-authorized", "fixture-only-authorized"] },
+        "allowed_payloads": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonblank" }
+        },
+        "forbidden_data": {
+          "type": "array",
+          "uniqueItems": true,
+          "allOf": [
+            { "contains": { "const": "credentials" } },
+            { "contains": { "const": "secrets" } },
+            { "contains": { "const": "environment-files" } },
+            { "contains": { "const": "account-content" } },
+            { "contains": { "const": "pii" } },
+            { "contains": { "const": "repository-content-outside-fixture" } }
+          ],
+          "items": { "$ref": "#/$defs/nonblank" }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "state": { "const": "none-authorized" } },
+            "required": ["state"]
+          },
+          "then": { "properties": { "allowed_payloads": { "maxItems": 0 } } },
+          "else": {
+            "properties": {
+              "allowed_payloads": {
+                "const": ["synthetic-fixture-prompt"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_cli_invocations",
+        "max_provider_requests",
+        "max_tasks",
+        "max_repetitions_per_configuration",
+        "max_retries",
+        "max_wall_clock_seconds",
+        "max_billed_cost_usd",
+        "billed_cost_limit_source"
+      ],
+      "properties": {
+        "max_cli_invocations": { "type": "integer", "minimum": 0 },
+        "max_provider_requests": { "type": ["integer", "null"], "minimum": 0 },
+        "max_tasks": { "type": "integer", "minimum": 0 },
+        "max_repetitions_per_configuration": { "type": "integer", "minimum": 0 },
+        "max_retries": { "type": "integer", "minimum": 0 },
+        "max_wall_clock_seconds": { "type": "integer", "minimum": 0 },
+        "max_billed_cost_usd": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "billed_cost_limit_source": {
+          "enum": ["unknown", "provider-enforced", "operator-stop"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "billed_cost_limit_source": { "const": "unknown" } },
+            "required": ["billed_cost_limit_source"]
+          },
+          "then": { "properties": { "max_billed_cost_usd": { "type": "null" } } },
+          "else": { "properties": { "max_billed_cost_usd": { "type": "number" } } }
+        }
+      ]
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "authorized_platforms",
+        "authorized_actions",
+        "forbidden_actions",
+        "authorization_ref",
+        "expires_at"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "not-authorized",
+            "dry-run-only",
+            "authorized-once",
+            "authorized-batch",
+            "blocked-after-preflight",
+            "expired"
+          ]
+        },
+        "authorized_platforms": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/platform" }
+        },
+        "authorized_actions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonblank" }
+        },
+        "forbidden_actions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonblank" }
+        },
+        "authorization_ref": { "$ref": "#/$defs/nullableSafePath" },
+        "expires_at": { "$ref": "#/$defs/nullableNonblank" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": { "enum": ["authorized-once", "authorized-batch"] }
+            },
+            "required": ["state"]
+          },
+          "then": {
+            "properties": {
+              "authorized_actions": {
+                "contains": { "const": "model-request" }
+              },
+              "forbidden_actions": {
+                "not": { "contains": { "const": "model-request" } }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": ["not-authorized", "dry-run-only", "expired"]
+              }
+            },
+            "required": ["state"]
+          },
+          "then": {
+            "properties": {
+              "authorized_actions": {
+                "not": { "contains": { "const": "model-request" } }
+              },
+              "forbidden_actions": {
+                "contains": { "const": "model-request" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "stopCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "action", "evidence_required"],
+      "properties": {
+        "id": {
+          "enum": [
+            "control-digest-drift",
+            "unresolved-model-alias",
+            "secret-access-required",
+            "unauthorized-network-tool",
+            "unauthorized-write",
+            "raw-output-secret-or-pii",
+            "receipt-or-oracle-incomplete",
+            "public-cli-unavailable"
+          ]
+        },
+        "action": { "const": "stop-no-retry" },
+        "evidence_required": { "$ref": "#/$defs/nonblank" }
+      }
+    },
+    "executionConfiguration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "configuration_id",
+        "platform",
+        "harness",
+        "client_version",
+        "requested_model",
+        "resolved_model",
+        "model_resolution_status",
+        "reasoning",
+        "profile",
+        "permissions_digest",
+        "toolset_digest",
+        "adapter_revision",
+        "binding_state",
+        "blocker"
+      ],
+      "properties": {
+        "configuration_id": { "$ref": "#/$defs/nonblank" },
+        "platform": { "$ref": "#/$defs/platform" },
+        "harness": { "$ref": "#/$defs/nonblank" },
+        "client_version": { "$ref": "#/$defs/nonblank" },
+        "requested_model": { "$ref": "#/$defs/nullableNonblank" },
+        "resolved_model": { "$ref": "#/$defs/nullableNonblank" },
+        "model_resolution_status": {
+          "enum": ["not-observed", "client-catalog-alias", "provider-resolved-id"]
+        },
+        "reasoning": { "$ref": "#/$defs/nullableNonblank" },
+        "profile": { "$ref": "#/$defs/nonblank" },
+        "permissions_digest": { "$ref": "#/$defs/nullableDigest" },
+        "toolset_digest": { "$ref": "#/$defs/nullableDigest" },
+        "adapter_revision": { "$ref": "#/$defs/nonblank" },
+        "binding_state": {
+          "enum": [
+            "declared-unbound",
+            "control-bound",
+            "receipt-bound",
+            "blocked"
+          ]
+        },
+        "blocker": { "$ref": "#/$defs/nullableNonblank" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "binding_state": {
+                "enum": ["control-bound", "receipt-bound"]
+              }
+            },
+            "required": ["binding_state"]
+          },
+          "then": {
+            "properties": {
+              "requested_model": { "$ref": "#/$defs/nonblank" },
+              "model_resolution_status": {
+                "enum": ["client-catalog-alias", "provider-resolved-id"]
+              },
+              "permissions_digest": { "$ref": "#/$defs/digest" },
+              "toolset_digest": { "$ref": "#/$defs/digest" },
+              "blocker": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "binding_state": { "const": "blocked" } },
+            "required": ["binding_state"]
+          },
+          "then": {
+            "properties": {
+              "requested_model": { "type": "null" },
+              "resolved_model": { "type": "null" },
+              "model_resolution_status": { "const": "not-observed" },
+              "permissions_digest": { "type": "null" },
+              "toolset_digest": { "type": "null" },
+              "blocker": { "$ref": "#/$defs/nonblank" }
+            }
+          },
+          "else": { "properties": { "blocker": { "type": "null" } } }
+        },
+        {
+          "if": {
+            "properties": { "binding_state": { "const": "declared-unbound" } },
+            "required": ["binding_state"]
+          },
+          "then": {
+            "properties": {
+              "requested_model": { "type": "null" },
+              "resolved_model": { "type": "null" },
+              "model_resolution_status": { "const": "not-observed" },
+              "permissions_digest": { "type": "null" },
+              "toolset_digest": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "model_resolution_status": { "const": "client-catalog-alias" } },
+            "required": ["model_resolution_status"]
+          },
+          "then": {
+            "properties": {
+              "requested_model": { "$ref": "#/$defs/nonblank" },
+              "resolved_model": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "model_resolution_status": { "const": "provider-resolved-id" } },
+            "required": ["model_resolution_status"]
+          },
+          "then": {
+            "properties": {
+              "requested_model": { "$ref": "#/$defs/nonblank" },
+              "resolved_model": { "$ref": "#/$defs/nonblank" }
+            }
+          }
+        }
+      ]
+    },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "invocation_id",
+        "configuration_id",
+        "platform",
+        "plan_state",
+        "execute",
+        "executable",
+        "cwd",
+        "argv",
+        "input_transport",
+        "stdin_source",
+        "stdout_format",
+        "stderr_policy",
+        "network_policy",
+        "file_policy",
+        "expected_cli_invocations",
+        "expected_provider_requests",
+        "blocker"
+      ],
+      "properties": {
+        "invocation_id": { "$ref": "#/$defs/nonblank" },
+        "configuration_id": { "$ref": "#/$defs/nonblank" },
+        "platform": { "$ref": "#/$defs/platform" },
+        "plan_state": { "enum": ["planned", "blocked"] },
+        "execute": { "type": "boolean" },
+        "executable": { "$ref": "#/$defs/nullableNonblank" },
+        "cwd": { "$ref": "#/$defs/nonblank" },
+        "argv": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/nonblank" }
+            }
+          ]
+        },
+        "input_transport": { "enum": ["stdin", "argument", "not-applicable"] },
+        "stdin_source": { "$ref": "#/$defs/nullableNonblank" },
+        "stdout_format": { "enum": ["jsonl", "json", "text", "not-applicable"] },
+        "stderr_policy": { "enum": ["capture", "not-applicable"] },
+        "network_policy": {
+          "enum": [
+            "codex-client-network-endpoints-unverified",
+            "claude-client-network-endpoints-unverified",
+            "blocked"
+          ]
+        },
+        "file_policy": { "const": "read-only" },
+        "expected_cli_invocations": { "type": "integer", "minimum": 0 },
+        "expected_provider_requests": { "type": ["integer", "null"], "minimum": 0 },
+        "blocker": { "$ref": "#/$defs/nullableNonblank" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "platform": { "const": "deepseek-harness" } },
+            "required": ["platform"]
+          },
+          "then": {
+            "properties": {
+              "plan_state": { "const": "blocked" },
+              "execute": { "const": false },
+              "executable": { "type": "null" },
+              "argv": { "type": "null" },
+              "input_transport": { "const": "not-applicable" },
+              "stdin_source": { "type": "null" },
+              "stdout_format": { "const": "not-applicable" },
+              "stderr_policy": { "const": "not-applicable" },
+              "network_policy": { "const": "blocked" },
+              "expected_cli_invocations": { "const": 0 },
+              "blocker": { "$ref": "#/$defs/nonblank" }
+            }
+          },
+          "else": {
+            "properties": {
+              "executable": { "$ref": "#/$defs/nonblank" },
+              "argv": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "#/$defs/nonblank" }
+              },
+              "input_transport": { "const": "stdin" },
+              "stdin_source": { "$ref": "#/$defs/nonblank" },
+              "stderr_policy": { "const": "capture" }
+            }
+          }
+        }
+      ]
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quality_comparison",
+        "inference",
+        "winner",
+        "ranking",
+        "promotion_recommendation"
+      ],
+      "properties": {
+        "quality_comparison": { "const": "not-computed" },
+        "inference": { "const": "not-computed" },
+        "winner": { "type": "null" },
+        "ranking": { "type": "null" },
+        "promotion_recommendation": { "type": "null" }
+      }
+    }
+  }
+}

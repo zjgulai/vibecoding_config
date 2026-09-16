@@ -1,0 +1,96 @@
+{
+  "schema_version": "1",
+  "card_id": "codex-gpt-5-6-sol-smoke-only-v1",
+  "card_revision": "2026-09-16.2",
+  "platform": "codex",
+  "execution_configuration": {
+    "configuration_id": "codex-eval10-real-smoke-v1",
+    "platform": "codex",
+    "harness": "codex-cli-with-eval10-adapter",
+    "client_version": "0.147.0",
+    "requested_model": "gpt-5.6-sol",
+    "resolved_model": null,
+    "model_resolution_status": "client-catalog-alias",
+    "reasoning": "low",
+    "profile": "custom",
+    "permissions_digest": "sha256:0b0eb1ac4720cbf0621a2ebbc6406ea38293e2d2722bcac66d7675128df5b4a2",
+    "toolset_digest": "sha256:b13a2946495050844b10603895fce8c5dc38b36f232a4838352273bd23e4417c",
+    "adapter_revision": "codex-eval10-v2@sha256:9b13e566995d930555a8cee8522e7ffdd77083976944bb0fd9229f08d1ae68c8",
+    "binding_state": "receipt-bound",
+    "blocker": null
+  },
+  "evidence_state": "smoke-only",
+  "evidence_basis": "single-smoke",
+  "state_reason": "smoke-only-completed",
+  "observed_runs": 1,
+  "task_shapes": [
+    "instruction-conflict"
+  ],
+  "outcome_summary": {
+    "completed": 1,
+    "failed": 0,
+    "stopped": 0,
+    "stop_reasons": []
+  },
+  "batch_binding": {
+    "state": "receipt-bound",
+    "batch_id": "codex-eval10-real-smoke-2026-09-16-once-01",
+    "batch_path": "batch.json",
+    "batch_digest": "sha256:212b8e332b12ecd4e6d53a7f6f791cef5afc986463799271cde800fe4dac324f",
+    "planned_runs": 1,
+    "retained_runs": 1,
+    "observed_runs": 1,
+    "planned_task_shapes": [
+      "instruction-conflict"
+    ],
+    "retained_task_shapes": [
+      "instruction-conflict"
+    ],
+    "observed_task_shapes": [
+      "instruction-conflict"
+    ]
+  },
+  "measurements": {
+    "provider_usage": {
+      "status": "unknown",
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached_input_tokens": null,
+      "reasoning_output_tokens": null,
+      "receipt_ref": null
+    },
+    "derived_usage": {
+      "status": "unknown",
+      "input_tokens": null,
+      "output_tokens": null,
+      "method": null
+    },
+    "billed_cost": {
+      "status": "unknown",
+      "amount_usd": null,
+      "receipt_ref": null
+    },
+    "derived_cost": {
+      "status": "unknown",
+      "amount_usd": null,
+      "method": null
+    }
+  },
+  "evidence": [
+    {
+      "type": "smoke-observation",
+      "observation_id": "codex-eval10-real-v2",
+      "path": "observation.json",
+      "digest": "sha256:83158c13b9b1906c75ff1326c0a9d1ffb2a7db28f318469de48e0c3de94447f9"
+    }
+  ],
+  "blockers": [],
+  "valid_until": "2026-10-16",
+  "expired_reason": null,
+  "decision": {
+    "routing": "undecided",
+    "winner": null,
+    "ranking": null,
+    "promotion_recommendation": null
+  }
+}

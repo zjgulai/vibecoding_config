@@ -16,6 +16,7 @@ from eval_protocol import (
     safe_relative_posix_path,
     tree_digest_v2,
     validate_digest,
+    validate_evidence_scope,
 )
 
 
@@ -32,7 +33,15 @@ TASK_IDS = (
     "10-instruction-conflict",
     "11-local-rule-linked-change",
 )
-TOP_LEVEL_FIELDS = ("schema_version", "manifest_revision", "digest_contract", "fixtures")
+MANIFEST_SCHEMA_VERSION = "2"
+SYNTHETIC_HARNESS_TASK_IDS = ("02-vertical-full-stack-feature",)
+TOP_LEVEL_FIELDS = (
+    "schema_version",
+    "manifest_revision",
+    "evidence_scope",
+    "digest_contract",
+    "fixtures",
+)
 FIXTURE_FIELDS = (
     "task_id",
     "task_revision",
@@ -138,9 +147,10 @@ def validate_manifest_structure(manifest: Mapping) -> None:
     if not isinstance(manifest, Mapping):
         raise ValueError("fixture manifest must be an object")
     exact_fields(manifest, TOP_LEVEL_FIELDS, TOP_LEVEL_FIELDS, "fixture manifest")
-    if manifest["schema_version"] != "1":
-        raise ValueError("schema_version must be '1'")
+    if manifest["schema_version"] != MANIFEST_SCHEMA_VERSION:
+        raise ValueError("schema_version must be {!r}".format(MANIFEST_SCHEMA_VERSION))
     nonblank(manifest["manifest_revision"], "manifest_revision")
+    evidence_scope = validate_evidence_scope(manifest["evidence_scope"], "evidence_scope")
 
     digest_contract = manifest["digest_contract"]
     if not isinstance(digest_contract, Mapping):
@@ -151,8 +161,15 @@ def validate_manifest_structure(manifest: Mapping) -> None:
             raise ValueError("digest_contract.{} must be {!r}".format(field, expected))
 
     fixtures = manifest["fixtures"]
-    if not isinstance(fixtures, list) or len(fixtures) != len(TASK_IDS):
-        raise ValueError("fixtures must contain exactly eleven task contracts")
+    expected_task_ids = (
+        TASK_IDS if evidence_scope == "representative" else SYNTHETIC_HARNESS_TASK_IDS
+    )
+    if not isinstance(fixtures, list) or len(fixtures) != len(expected_task_ids):
+        if evidence_scope == "representative":
+            raise ValueError("fixtures must contain exactly eleven task contracts")
+        raise ValueError(
+            "synthetic-harness-only fixtures must contain exactly one EVAL-02 task contract"
+        )
 
     seen_tasks = set()
     seen_fixture_ids = set()
@@ -162,8 +179,13 @@ def validate_manifest_structure(manifest: Mapping) -> None:
             raise ValueError("{} must be an object".format(label))
         exact_fields(fixture, FIXTURE_FIELDS, FIXTURE_FIELDS, label)
         task_id = fixture["task_id"]
-        if task_id not in TASK_IDS:
-            raise ValueError("{}.task_id is not one of the eleven eval tasks".format(label))
+        if task_id not in expected_task_ids:
+            if evidence_scope == "representative":
+                raise ValueError("{}.task_id is not one of the eleven eval tasks".format(label))
+            raise ValueError(
+                "{}.task_id must be 02-vertical-full-stack-feature for synthetic-harness-only"
+                .format(label)
+            )
         if task_id in seen_tasks:
             raise ValueError("duplicate task_id {!r}".format(task_id))
         seen_tasks.add(task_id)
@@ -189,8 +211,8 @@ def validate_manifest_structure(manifest: Mapping) -> None:
         elif initial_digest is not None:
             raise ValueError("{}.initial_state_digest must be null while contract-only".format(label))
 
-    if seen_tasks != set(TASK_IDS):
-        missing = sorted(set(TASK_IDS) - seen_tasks)
+    if seen_tasks != set(expected_task_ids):
+        missing = sorted(set(expected_task_ids) - seen_tasks)
         raise ValueError("fixtures missing task_id values: {}".format(", ".join(missing)))
 
 
@@ -249,6 +271,7 @@ def validate_manifest(
         "contract_only_fixture_count": len(contract_only),
         "fixture_count": len(manifest["fixtures"]),
         "manifest_revision": manifest["manifest_revision"],
+        "evidence_scope": manifest["evidence_scope"],
         "digest_algorithm": "sha256-tree-v2",
     }
 

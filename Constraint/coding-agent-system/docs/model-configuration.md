@@ -5,7 +5,7 @@ module: coding-agent-system
 topic: model-configuration
 status: stable
 created: 2026-08-29
-updated: 2026-08-30
+updated: 2026-09-16
 owner: self
 source: human+ai
 ---
@@ -49,6 +49,20 @@ source: human+ai
 | 身份认证、授权、隐私、支付、数据库迁移 | `quality` | 高至最高 | 模型能力不能替代人工审批、权限控制和回滚方案。 |
 | 架构决策、技术选型、最终对抗性审查 | `quality` | 高至最高 | 让独立上下文审查证据，避免实现者自评。 |
 | 并行子任务 | 按子任务选择 | 低至高 | 每个子任务只承担一个可独立验收的目标。 |
+
+## 按工件可判定性路由
+
+模型选择不按作者偏好、固定岗位名或运行时长决定，而由当前工件的歧义、风险、反馈速度和 oracle 强度决定：
+
+| 工作形态 | 默认档位 | 判定依据 |
+| --- | --- | --- |
+| 问题定义、产品取舍、共享契约、架构边界、权限/数据决定、独立完成裁决 | `quality` | 需要消解语义冲突、权衡持久影响或识别遗漏；单一自动检查不能给出答案。 |
+| 已批准规格到垂直 slice、目标 adapter、常规实现与测试 | `balanced` | 输入输出已较清楚，但仍需跨文件判断和风险相称验证。 |
+| schema 固定、步骤机械、存在确定性 oracle 的转换或检索 | `economy` | 结果可以由 parser、typecheck、测试、diff 或同等确定性检查直接判定。 |
+
+出现规格—测试—实现冲突、跨目标语义漂移、根因不明或完成声明无法被观察时，应升级任务方法或模型档位；不要只因编译、下载或测试耗时长而升级。反过来，高能力模型也不能替代缺失的 reference contract、原生 validator、数据授权或生产门。
+
+模型/provider 对比必须固定故事假设、批准规格、工件版本、fixture、工具、权限和 grader，一次只改变一个主要变量。先记录 baseline，再保留 candidate 的成功、失败与 `null`；少量合成运行只能称 smoke evidence，不能据此固定“某模型负责架构、某模型负责 UI”之类的长期分工。
 
 ## Codex
 
@@ -227,7 +241,39 @@ Harness 当前不应由本项目猜测一套通用 raw YAML profile。先在 `Se
 
 ## 升级与评测
 
-Auto Research 评测协议/控制面提供严格的运行记录、成对比较、停止条件与缺失值协议，但协议本身不是模型质量证据。其迭代结构受 `karpathy/autoresearch@228791f` 的固定范围、固定度量与保留/丢弃循环启发；本项目没有复用该仓库的训练代码或 `program.md` 文本。本轮没有运行真实 Agent、付费模型或代表性 fixture；下列流程是未来取得单独授权后的执行规范。
+Auto Research 评测协议/控制面提供严格的运行记录、成对比较、停止条件与缺失值协议，但协议本身不是模型质量证据。其迭代结构受 `karpathy/autoresearch@228791f` 的固定范围、固定度量与保留/丢弃循环启发；本项目没有复用该仓库的训练代码或 `program.md` 文本。本轮先用本地 test-double 跑通 EVAL-10 representative fixture，随后在精确的一次性授权下完成一次真实 Codex connectivity smoke。该观察只证明此 execution configuration 的单次 lifecycle 能完成，不是模型质量或生产适用性证据。
+
+### 2026-09-16 能力卡状态
+
+当前能力卡位于 `evals/calibration/cards/`：Codex 为 `smoke-only`，Claude Code 与 DeepSeek Harness 为 `unobserved`；不存在 winner、ranking、promotion 或默认品牌路由：
+
+| 平台 | 当前状态 | 已证实 | 尚未证实 / blocker |
+| --- | --- | --- | --- |
+| Codex | `smoke-only`; one receipt-bound EVAL-10 connectivity observation | Codex CLI `0.147.0`、requested model `gpt-5.6-sol`、reasoning `low` 的唯一一次 invocation 完成；harness retries `0`、oracle/output guard `pass`、无 quarantine、无临时 session residue。完整 evidence graph 绑定 fixture、prompt、adapter、control、installation snapshot、grant/consumption、provider sidecar、receipt 与 artifacts。 | 单次 connectivity smoke 不证明模型质量、通用抗注入能力或生产就绪。本地 package digest 不认证 publisher，requested model 仍只是 client catalog alias；provider/model identity、resolved model、transport retry、实际 endpoint、wire request 数、usage 与 billed cost 均未验证或保持 `unknown/null`。 |
+| Claude Code | `unobserved`, declared-unbound | 本机版本与非交互调用形状已登记 | 本轮没有 control-bound 配置、真实请求或 receipt。 |
+| DeepSeek Harness | `unobserved`, blocked | DSH Desktop 与 bundle 版本元数据已登记 | PATH 中没有公开、可固定版本的 `dsh` CLI；不得调用 Desktop 内部 bundle 冒充公开 headless 接口。 |
+
+OpenAI 配置参考把 `request_max_retries` 与 `stream_max_retries` 定义在自定义 `model_providers.<id>` 下，同时明确 built-in `openai` provider ID 保留且不能覆盖；因此当前使用 built-in provider 的 ChatGPT 登录路径没有公开的同层 retry 归零开关，不能据此证明只有一次 wire request。[Configuration Reference](https://learn.chatgpt.com/docs/config-file/config-reference) 当前 harness 也不能证明 Codex client 的所有网络 endpoint 都只指向 provider，或在调用前执行一个 provider-enforced billed-cost ceiling。这些限制只支持停止与授权边界，不支持推断实际请求次数、token、账单成本或模型质量；相应字段继续保持 `unknown/null`。
+
+本地证据门禁现使用 `smoke-observation-v2`，而 test-double 只能生成独立的
+`calibration-test-double-observation-v1`。真实 Codex grant 必须 exact 允许 model request、
+Codex client transport、synthetic prompt egress、本地证据和一次性 registry 写入，并 exact
+禁止 retry/web/browser/MCP/tool/credential/config/git/external effect。grant 绑定 batch 与安装
+身份，有效期覆盖完整 lifecycle；registry 以 batch digest 为唯一键，不能通过更换 nonce、
+grant 或安装重放。观察证据会打开并重验 batch、manifest/fixture/oracle、prompt、canonical
+adapter、完整 argv、exact permission/tool policy、本地 package-shape/digest snapshot、grant/
+consumption、provider sidecar v2、receipt v4、output guard、summary 与 artifact tree。`real_agent_execution=true`
+只表示绑定的 model-bearing client 子进程已启动，不表示 publisher 或 provider/model 身份已
+认证。当前真实路径仅在 macOS 上允许，且必须通过 `sandbox-exec deny process-fork`
+自检、model-bearing client 加入 adapter 外层 lifecycle process group、deadline 硬终止与
+parent-owned 临时凭据目录回收。当前 v1
+batch 不能逐 cell 预注册 run/task shape，因此只允许形成 `smoke-only`；
+`provisionally-calibrated` 保持 fail-closed。过期 active card 也必须转为不携带旧 claims 的
+`expired` tombstone。
+回溯 validator 会 exact 拒绝用 Linux/Windows retained identity 搭配 macOS containment sidecar、拒绝改名
+`control.json`。Capability card 的 state reason 改为由 evidence state/outcome 派生的受控 code，
+blockers、configuration blocker 与 expired reason 也为 allowlist code，不保留可以换同义句夹带
+winner、production-ready 或默认路由的自由叙事通道。
 
 ### 触发条件
 

@@ -1,0 +1,39 @@
+{
+  "schema_version": "1",
+  "grant_revision": "calibration-authorization-grant-v1",
+  "grant_id": "codex-eval10-real-smoke-2026-09-16-once-01",
+  "nonce": "7A332E68-5FA2-416F-B09C-B55C7F0EE6FC",
+  "source": "interactive-user-authorization",
+  "decision": "approved-once",
+  "platform": "codex",
+  "batch_id": "codex-eval10-real-smoke-2026-09-16-once-01",
+  "batch_digest": "sha256:212b8e332b12ecd4e6d53a7f6f791cef5afc986463799271cde800fe4dac324f",
+  "installation_identity_digest": "sha256:7d7a5b29193681f57760f84d2a7b86a1f775492a4c84ca8811bb6493a71c4696",
+  "authorized_actions": [
+    "model-request",
+    "codex-client-network-transport",
+    "synthetic-fixture-prompt-egress",
+    "local-receipt-and-artifact-write",
+    "authorization-consumption-registry-write"
+  ],
+  "forbidden_actions": [
+    "retry",
+    "web-search",
+    "browser",
+    "mcp",
+    "agent-tool-use",
+    "credential-content-inspection",
+    "user-config-write",
+    "git-write",
+    "external-side-effect"
+  ],
+  "allowed_egress": [
+    "synthetic-fixture-prompt"
+  ],
+  "network_scope": "codex-client-network-endpoints-unverified",
+  "max_cli_invocations": 1,
+  "max_provider_requests": null,
+  "max_billed_cost_usd": null,
+  "billed_cost_limit_source": "unknown-no-verifiable-cap",
+  "expires_at": "2026-09-16T10:00:00+00:00"
+}
