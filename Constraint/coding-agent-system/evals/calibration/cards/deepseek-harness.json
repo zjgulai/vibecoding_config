@@ -1,0 +1,79 @@
+{
+  "schema_version": "1",
+  "card_id": "deepseek-harness-unobserved-v1",
+  "card_revision": "2026-09-16.1",
+  "platform": "deepseek-harness",
+  "execution_configuration": {
+    "configuration_id": "deepseek-harness-public-cli-blocked-v1",
+    "platform": "deepseek-harness",
+    "harness": "dsh-headless",
+    "client_version": "desktop-2.0.9+dsh-cli-0.1.5-rc.1",
+    "requested_model": null,
+    "resolved_model": null,
+    "model_resolution_status": "not-observed",
+    "reasoning": null,
+    "profile": "headless-pending-pinned-profile",
+    "permissions_digest": null,
+    "toolset_digest": null,
+    "adapter_revision": "not-available",
+    "binding_state": "blocked",
+    "blocker": "public-version-pinned-dsh-cli-not-available-on-path"
+  },
+  "evidence_state": "unobserved",
+  "evidence_basis": "none",
+  "state_reason": "unobserved-no-retained-observation",
+  "observed_runs": 0,
+  "task_shapes": [],
+  "outcome_summary": null,
+  "batch_binding": {
+    "state": "none",
+    "batch_id": null,
+    "batch_path": null,
+    "batch_digest": null,
+    "planned_runs": 0,
+    "retained_runs": 0,
+    "observed_runs": 0,
+    "planned_task_shapes": [],
+    "retained_task_shapes": [],
+    "observed_task_shapes": []
+  },
+  "measurements": {
+    "provider_usage": {
+      "status": "unknown",
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached_input_tokens": null,
+      "reasoning_output_tokens": null,
+      "receipt_ref": null
+    },
+    "derived_usage": {
+      "status": "unknown",
+      "input_tokens": null,
+      "output_tokens": null,
+      "method": null
+    },
+    "billed_cost": {
+      "status": "unknown",
+      "amount_usd": null,
+      "receipt_ref": null
+    },
+    "derived_cost": {
+      "status": "unknown",
+      "amount_usd": null,
+      "method": null
+    }
+  },
+  "evidence": [],
+  "blockers": [
+    "public-version-pinned-dsh-cli-not-available-on-path",
+    "headless-execution-configuration-not-bindable"
+  ],
+  "valid_until": null,
+  "expired_reason": null,
+  "decision": {
+    "routing": "undecided",
+    "winner": null,
+    "ranking": null,
+    "promotion_recommendation": null
+  }
+}

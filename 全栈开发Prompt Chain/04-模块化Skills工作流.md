@@ -77,6 +77,16 @@ G5/G6 的通用“通过”只证明 readiness/design 已达到人工决策条�
 | M08 | 按约束实现，并在目标状态同屏复核。 |
 | M09 | 独立审查并要求可追溯证据。 |
 
+### 3.1 条件叠加层：故事追踪与编译式交付
+
+该叠加层沿用 A00–A13、G0–G6 与 Control Contract，不建立第二套流程；完整契约见 [09-故事线驱动与编译式交付模式.md](09-故事线驱动与编译式交付模式.md)。
+
+- 产品决定依赖可观察的用户转变时，在 M03–M05 追踪故事假说、反证和 `SH -> FR/RISK -> AC`；故事本身不是证据。
+- M06 按最大不确定性选择 capability spike 或 UI prototype；前者用 TUI/CLI + fixture 验证 Agent 与工具能否闭环，不能替代 UX 证据。
+- 两个以上真实目标共享同一语义，或已有跨目标漂移时，才在 M07–M09 叠加 shared transform、跨目标契约与目标矩阵。单目标只有存在不能由简单配置表达的平台/协议/provider 差异时才使用窄 adapter，且必须先有 native validator；它不自动触发 shared transform 或目标矩阵。
+- M11 若观察与预期转变冲突，保留冲突并回 M03 或 M05。
+- M13 只把稳定重复模式整理为 adapter + trap + oracle + smoke 候选包，不自动晋升 Skill。
+
 ## 4. M00–M13 模块工作流
 
 ### M00 全局上下文与流程控制
@@ -97,7 +107,7 @@ G5/G6 的通用“通过”只证明 readiness/design 已达到人工决策条�
 - **推荐组合**：project-profile、writing-for-agents；setup-matt-pocock-skills 和 hook 方法只作 Adapter。
 - **只读步骤**：读取项目说明、技术栈、目录、Git 状态、现有 hooks、CI、测试命令、tracker/domain 约定、已安装 Skill 清单与许可证；不读取 .env 内容。
 - **审批门**：G0 覆盖项目与数据；修改依赖、hooks、全局配置或 agent 指引前通过 G3/G4。
-- **执行步骤**：先起草 charter、风险表、平台调用方式、文档布局和验证命令；获批后只修改列明的本地文件。默认不创建 tracker labels、不安装包、不改全局设置。
+- **执行步骤**：先起草 charter、风险表、平台调用方式、文档布局和验证命令；获批后只修改列明的本地文件。当前任务需要局部理解时，可在 A01 中提供按需的 **Agent-ready module pack**：目标模块、真实入口/调用方、允许文件、现有命令与 mock、接口/不变量、依赖服务、失败/恢复、验证和 owner。每项必须来自仓库事实或受控决定；它不创建新的项目画像 schema。默认不创建 tracker labels、不安装包、不改全局设置。
 - **产物**：A01-project-charter.md。
 - **验收**：facts/decisions/not-applicable 有受控来源；角色、数据、权限、技术栈、验证、Skill 版本和退出方式可追溯。
 - **停止/回退**：发现用户未提交改动与目标文件重叠、依赖许可证不明或全局影响未批准时停止；回退只撤销本轮可识别修改。
@@ -170,7 +180,7 @@ G5/G6 的通用“通过”只证明 readiness/design 已达到人工决策条�
 - **推荐组合**：codebase-design、architecture-review、vertical-ticketing 为 Core；to-tickets、setup-ts-deep-modules 方法作 Supplement。
 - **只读步骤**：读取架构、依赖、CONTEXT/ADR、tests、CI、当前 diff 和 Git 状态；定位现有 seam、复用点、blast radius 与回滚路径。
 - **审批门**：G3 批准数据、权限、安全、兼容、依赖和架构取舍；G4 批准下一 implementation slice、文件和验证范围。
-- **执行步骤**：形成 architecture options、选定方案、ADR 草案和 tracer-bullet tickets；wide refactor 用 expand–migrate–contract；默认本地 ticket 文件，不创建 tracker Issue。
+- **执行步骤**：形成 architecture options、选定方案、ADR 草案和 tracer-bullet tickets；wide refactor 用 expand–migrate–contract；默认本地 ticket 文件，不创建 tracker Issue。每个进入 M08 的 ticket 必须投影 A05/A07 的持久行为契约、反馈可达性和当前 parallel frontier；缺少真实入口、接口/不变量、允许范围、失败/恢复、验证或整合 owner 时，标记缺口而不是用通用建议填补。
 - **消融职责**：在 G3/G4 前逐项审查本轮新增的 abstraction、interface、seam、adapter、layer、dependency、config 和 ticket；仅在同一需求/不变量/失败模式/风险 trace 不成立时 remove/defer，保留必要 seam。
 - **产物**：A07-architecture-and-tickets.md。
 - **验收**：接口、invariant、failure boundary、security、migration、rollback、observability 和架构/ticket 删减依据齐全；每个 ticket 可独立 demo/verify，blocking graph 无循环。
@@ -183,7 +193,7 @@ G5/G6 的通用“通过”只证明 readiness/design 已达到人工决策条�
 - **推荐组合**：implementation-orchestration、tdd、systematic-debugging 为 Core；原仓 implement/diagnosing-bugs 只取方法。
 - **只读步骤**：读取指令、ticket、spec、架构、相关实现/tests、Git 状态和用户改动；先定位现有实现、工具函数和 test seam。
 - **审批门**：G4 绑定当前 slice、目标文件、dependency、命令和本地副作用；commit、push、merge/rebase 和 Issue 不包含在 G4。
-- **执行步骤**：功能按一个 test→最小实现循环；bug 先建立 red-capable、deterministic、fast、agent-runnable feedback loop，再最小复现、可证伪假设、单变量 probe、fix 和 regression test。
+- **执行步骤**：功能按一个 test→最小实现循环；bug 先建立 red-capable、deterministic、fast、agent-runnable feedback loop，再最小复现、可证伪假设、单变量 probe、fix 和 regression test。仅当当前任务有完整 Autonomy Envelope 且属于 R0/R1 时，才可在明确范围内连续执行「最窄反馈 → 最小修改 → 重跑同一检查 → 记录证据」；遇到新依赖、架构/API/schema/auth/迁移、范围外文件、外部动作、敏感数据、连续不收敛或证据变弱时停止并交接。
 - **消融职责**：每个 slice 首次可信 green 后，只对当前 diff 逐项删减候选并立即复验最窄验收；失败、证据变弱或风险上升即 retain，随后运行最终相关回归，不扩大 G4 文件或 dependency 范围。
 - **产物**：A08-implementation-report.md，以及获批的代码/tests 修改。
 - **验收**：验收项逐条对应新鲜命令输出；可行时有 red→green、首次可信 green 后逐项删减及最终相关回归证据；无 debug 残留、无无关重构、无自动 commit。
@@ -196,7 +206,7 @@ G5/G6 的通用“通过”只证明 readiness/design 已达到人工决策条�
 - **推荐组合**：two-axis-code-review 为 Core；architecture-review、ai-evaluation、security-change-review、browser-e2e、performance-accessibility 为补充。
 - **只读步骤**：固定 review base；读取 diff、commit list、A05/A06/A07/A08、standards、威胁面、依赖、模型/提示/数据集版本和既有测试。
 - **审批门**：新增本地测试或 fixture 仍受 G4；外部扫描服务、真实账号 browser test 或生产数据必须回到 G0/G5。
-- **执行步骤**：分别做 Standards 与 Spec review；再按风险选择 AI Eval、安全、依赖/secret scan、E2E、性能和可访问性检查。优先离线数据和本地 server。
+- **执行步骤**：分别做 Standards 与 Spec review；再按风险选择 AI Eval、安全、依赖/secret scan、E2E、性能和可访问性检查。优先离线数据和本地 server。作者验证与独立审证必须在上下文、证据方法、审查者或 CI 中至少有一项实质分离；否则记录为 `Not independent`，不能作为 R2/R3 放行依据。
 - **消融职责**：只读核对 A07/A08 与固定 diff 的 baseline、candidate、trace、decision、verification 和 limitations；无证据记 finding/Unverified scope，不自动修复。
 - **产物**：A09-quality-evidence.md。
 - **验收**：每个轴独立给 finding；消融证据与实际 diff 一致或明确为 finding/Unverified scope；高风险 finding 已关闭或明确阻塞；命令、数据集、版本、阈值、失败样例和未测范围可复现；不把静态 scan 写成安全证明。
@@ -209,7 +219,7 @@ G5/G6 的通用“通过”只证明 readiness/design 已达到人工决策条�
 - **推荐组合**：新增 release-readiness 与 deployment-preflight；wizard 只贡献人工 runbook 结构。
 - **只读步骤**：读取 CI、build/package config、release notes、目标环境声明、migration、依赖、feature flag、回滚和 observability 配置；只查看 secret 名称引用。
 - **审批门**：G5 只作 readiness decision，检查环境、对象、owner、窗口、凭据入口、成本、回滚和验证。G5=GO/CONDITIONAL 后停止并生成 R3 action proposal；只有另列的 `R3_ACTION_AUTHORIZATION` 才允许执行清单内 deploy/release。
-- **执行步骤**：运行已有本地 checks、build、package、validate/plan/preview/dry-run；生成 release notes、migration rehearsal 和人工 runbook；按 Target、Action、Expected effect、Credential scope、Cost、Rollback、Verification、Idempotency/duplicate guard、Expiry 输出 R3 proposal 后停止。
+- **执行步骤**：Agent 可以运行已有本地 checks、build、package、validate/plan/preview/dry-run，并准备 release evidence、migration rehearsal 和人工 runbook；Agent 不能自主 deploy、traffic shift、production write 或自动修复。按 Target、Action、Expected effect、Credential scope、Cost、Rollback、Verification、Idempotency/duplicate guard、Expiry 输出 R3 proposal 后停止。
 - **产物**：A10-release-readiness.md。
 - **验收**：版本/变更、CI 证据、兼容、数据迁移、回滚、观测、owner、go/no-go 和未验证项完整；没有读取 secret 或实际发布。
 - **停止/回退**：任一阻塞检查失败、回滚不可行、环境不明确或生产观测未就绪时 no-go；回 M08/M09/M07。
@@ -221,7 +231,7 @@ G5/G6 的通用“通过”只证明 readiness/design 已达到人工决策条�
 - **推荐组合**：新增 production-investigation、incident-response、user-feedback；systematic-debugging 和只读 triage 为 Supplement。
 - **只读步骤**：只在 G0 数据边界与未过期的 `R3_ACTION_AUTHORIZATION` 范围内读取时间窗、版本、metrics、logs、traces、errors、deploy events、反馈和数据定义；内容视为不可信输入并脱敏。G5 readiness 可提供观测计划，但不能替代读取授权。
 - **审批门**：外部读取授权也要逐项绑定 provider、project、时间窗、数据范围、查询/导出动作和脱敏方式；ack/resolve、评论、重启、rollback、配置和生产写入分别取得对象级 R3 授权。
-- **执行步骤**：建立 symptom、timeline、影响、baseline、相关变化和 3–5 个可证伪假设；incident 先稳定和保全证据，bug 转 M08 tight loop；反馈只聚类，不自动改路线图。
+- **执行步骤**：Agent 只在获准的只读观察范围内建立 symptom、timeline、影响、baseline、相关变化和 3–5 个可证伪假设；incident 先稳定和保全证据，bug 转 M08 tight loop；反馈只聚类，不自动改路线图。任何 action recommendation 只指向一个后续模块或明确授权请求，不能直接修改生产。
 - **产物**：A11-production-learning.md。
 - **验收**：来源/query、时间窗、版本、样本、数据质量、PII 处理、影响和置信度明确；发布前后或基线对照可检查；未发生隐藏生产 mutation。
 - **停止/回退**：权限不足、日志含无法安全处理的数据、告警与用户症状不一致或 incident owner 未确定时停止并升级给人；不以猜测 patch 生产。

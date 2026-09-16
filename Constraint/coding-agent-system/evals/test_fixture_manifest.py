@@ -84,10 +84,15 @@ def make_fixture(
     }
 
 
-def make_manifest(readiness: str = "contract-only", digest: Optional[str] = None) -> dict:
+def make_manifest(
+    readiness: str = "contract-only",
+    digest: Optional[str] = None,
+    evidence_scope: str = "representative",
+) -> dict:
     return {
-        "schema_version": "1",
+        "schema_version": "2",
         "manifest_revision": "2026-08-29.1",
+        "evidence_scope": evidence_scope,
         "digest_contract": {
             "algorithm": "sha256-tree-v2",
             "excluded_paths": [".git/**"],
@@ -121,6 +126,51 @@ def run_validator(arguments: List[str]) -> subprocess.CompletedProcess:
 
 
 class FixtureManifestTests(unittest.TestCase):
+    def test_evidence_scope_is_required_and_known(self) -> None:
+        missing = make_manifest()
+        del missing["evidence_scope"]
+        with self.assertRaisesRegex(ValueError, "evidence_scope"):
+            validate_fixture.validate_manifest_structure(missing)
+
+        unknown = make_manifest(evidence_scope="quality-evidence")
+        with self.assertRaisesRegex(ValueError, "evidence_scope"):
+            validate_fixture.validate_manifest_structure(unknown)
+
+    def test_schema_declares_evidence_scope_partitions(self) -> None:
+        schema = json.loads(
+            (EVALS_DIR / "fixture-manifest.schema.json").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(schema["properties"]["schema_version"]["const"], "2")
+        self.assertEqual(
+            schema["properties"]["evidence_scope"]["enum"],
+            ["representative", "synthetic-harness-only"],
+        )
+        branches = schema["allOf"]
+        self.assertEqual(len(branches), 2)
+        self.assertEqual(
+            branches[0]["then"]["properties"]["fixtures"]["minItems"], 11
+        )
+        self.assertEqual(
+            branches[1]["then"]["properties"]["fixtures"]["maxItems"], 1
+        )
+
+    def test_evidence_scope_partitions_fixture_cardinality(self) -> None:
+        synthetic = make_manifest(evidence_scope="synthetic-harness-only")
+        synthetic["fixtures"] = [synthetic["fixtures"][1]]
+
+        validate_fixture.validate_manifest_structure(synthetic)
+
+        representative = make_manifest(evidence_scope="representative")
+        representative["fixtures"] = representative["fixtures"][:1]
+        with self.assertRaisesRegex(ValueError, "exactly eleven"):
+            validate_fixture.validate_manifest_structure(representative)
+
+        wrong_synthetic_task = make_manifest(evidence_scope="synthetic-harness-only")
+        wrong_synthetic_task["fixtures"] = [wrong_synthetic_task["fixtures"][2]]
+        with self.assertRaisesRegex(ValueError, "02-vertical-full-stack-feature"):
+            validate_fixture.validate_manifest_structure(wrong_synthetic_task)
+
     def test_contract_only_example_passes_explicit_structure_check_but_not_baseline(self) -> None:
         manifest_path = EVALS_DIR / "fixture-manifest.example.json"
 
@@ -142,7 +192,13 @@ class FixtureManifestTests(unittest.TestCase):
         self.assertFalse(schema["additionalProperties"])
         self.assertEqual(
             set(schema["required"]),
-            {"schema_version", "manifest_revision", "digest_contract", "fixtures"},
+            {
+                "schema_version",
+                "manifest_revision",
+                "evidence_scope",
+                "digest_contract",
+                "fixtures",
+            },
         )
         self.assertEqual(
             schema["properties"]["digest_contract"]["properties"]["algorithm"]["const"],
@@ -301,8 +357,8 @@ class FixtureManifestTests(unittest.TestCase):
     def test_manifest_loader_rejects_duplicate_json_keys(self) -> None:
         manifest_path = EVALS_DIR / "fixture-manifest.example.json"
         text = manifest_path.read_text(encoding="utf-8").replace(
-            '"schema_version": "1",',
-            '"schema_version": "1",\n  "schema_version": "1",',
+            '"schema_version": "2",',
+            '"schema_version": "2",\n  "schema_version": "2",',
             1,
         )
         with tempfile.TemporaryDirectory() as directory:

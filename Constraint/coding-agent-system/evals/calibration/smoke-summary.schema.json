@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/smoke-summary.schema.json",
+  "title": "Calibration connectivity smoke summary",
+  "description": "A fail-closed connectivity summary. Quality, ranking, winner and promotion claims are outside this contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "execution_configuration_id",
+    "execution_configuration_digest",
+    "receipt_configuration_digest",
+    "batch_binding",
+    "execution_identity",
+    "run_status",
+    "failure",
+    "oracle_outcome",
+    "quality_assessment",
+    "quality_comparison",
+    "inference",
+    "measurements",
+    "raw_output_sentinel_detected",
+    "receipt_path",
+    "observation_path",
+    "raw_stdout_path",
+    "raw_stderr_path",
+    "quarantine_created",
+    "mechanically_eligible",
+    "unverified_scope"
+  ],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "task_id": { "$ref": "#/$defs/nonblank" },
+    "execution_configuration_id": { "$ref": "#/$defs/nonblank" },
+    "execution_configuration_digest": { "$ref": "#/$defs/digest" },
+    "receipt_configuration_digest": { "$ref": "#/$defs/digest" },
+    "batch_binding": {
+      "$ref": "smoke-observation.schema.json#/$defs/batchBinding"
+    },
+    "execution_identity": { "$ref": "#/$defs/executionIdentity" },
+    "run_status": { "enum": ["completed", "failed", "stopped"] },
+    "failure": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/nonblank" }
+      ]
+    },
+    "oracle_outcome": { "enum": ["pass", "fail", "not-run"] },
+    "quality_assessment": { "const": false },
+    "quality_comparison": { "const": "not-applicable" },
+    "inference": { "const": "not-computed" },
+    "measurements": {
+      "$ref": "capability-card.schema.json#/$defs/measurements"
+    },
+    "raw_output_sentinel_detected": { "type": "boolean" },
+    "receipt_path": { "$ref": "#/$defs/safePath" },
+    "observation_path": { "$ref": "#/$defs/safePath" },
+    "raw_stdout_path": { "$ref": "#/$defs/safePath" },
+    "raw_stderr_path": { "$ref": "#/$defs/safePath" },
+    "quarantine_created": { "type": "boolean" },
+    "mechanically_eligible": { "const": false },
+    "unverified_scope": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonblank" }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "run_status": { "const": "completed" } },
+        "required": ["run_status"]
+      },
+      "then": { "properties": { "failure": { "type": "null" } } },
+      "else": { "properties": { "failure": { "$ref": "#/$defs/nonblank" } } }
+    }
+  ],
+  "$defs": {
+    "nonblank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "safePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    },
+    "executionIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executor",
+        "agent",
+        "client_version",
+        "requested_model",
+        "resolved_model",
+        "reasoning_effort",
+        "real_agent_execution",
+        "identity_authentication",
+        "installation_identity_digest"
+      ],
+      "properties": {
+        "executor": { "$ref": "#/$defs/nonblank" },
+        "agent": { "enum": ["codex", "claude-code", "deepseek-harness"] },
+        "client_version": { "$ref": "#/$defs/nonblank" },
+        "requested_model": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/nonblank" }]
+        },
+        "resolved_model": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/nonblank" }]
+        },
+        "reasoning_effort": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/nonblank" }]
+        },
+        "real_agent_execution": { "type": "boolean" },
+        "identity_authentication": {
+          "enum": [
+            "local-package-shape-and-digest-consistency",
+            "invocation-declared-not-cryptographically-authenticated"
+          ]
+        },
+        "installation_identity_digest": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/digest" }]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "real_agent_execution": { "const": true } },
+            "required": ["real_agent_execution"]
+          },
+          "then": {
+            "properties": {
+              "identity_authentication": {
+                "const": "local-package-shape-and-digest-consistency"
+              },
+              "installation_identity_digest": { "$ref": "#/$defs/digest" }
+            }
+          },
+          "else": {
+            "properties": {
+              "identity_authentication": {
+                "const": "invocation-declared-not-cryptographically-authenticated"
+              },
+              "installation_identity_digest": { "type": "null" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

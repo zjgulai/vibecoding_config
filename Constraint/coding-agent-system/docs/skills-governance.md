@@ -5,7 +5,7 @@ module: coding-agent-system
 topic: skills-and-capability-governance
 status: stable
 created: 2026-08-29
-updated: 2026-08-30
+updated: 2026-09-15
 owner: self
 source: human+ai
 ---
@@ -113,11 +113,13 @@ metadata:
 | `memory-governance` | 本地 tips 与外链中关于候选来源、作用域、冲突、过期、隐私和人工晋升的治理方法，经证据分级后独立重写。 |
 | `technical-research` | `research` 的一手证据追溯，改为默认回答内汇报且不自动委派或写文件。 |
 | `domain-modeling` | `domain-modeling` 的共享语言、情景检验和 ADR 三条件，改为按授权范围记录。 |
-| `codebase-design` | `codebase-design` 的 deep module、interface、seam、adapter、leverage 与 locality 词汇。 |
+| `codebase-design` | `codebase-design` 的 deep module、interface、seam、adapter、leverage 与 locality 词汇；多目标漂移风险成立时，按需加载 independently adapted 的 spec-to-target pipeline 参考。 |
 | `architecture-review` | `improve-codebase-architecture` 的热点优先与候选强度，改为用户指定范围的只读报告。 |
 | `implementation-orchestration` | `implement` 的小批次实施编排，移除自动 commit、tracker 写入和无确认执行。 |
 
 `writing-for-agents` 同时支持 Create 与 Audit。Audit 以「是否改变 Agent 决策、是否属于正确层级、是否有足够证据」三个准入问题，把候选规则判为 retain、rewrite、move、delete 或 needs-evidence；这项能力没有被拆成第 11 个重复 Skill。
+
+`fable-compiler/Fable` 与 `Sahir619/fable-method` 作为方法来源记录在 [`research-methods.lock.json`](../sources/research-methods.lock.json)。本系统不新增笼统的 `fable` Skill：前者独有的多目标语义/原生验证方法进入 `codebase-design/references/spec-to-target-pipeline.md`；后者的 intent、twin、claim 裁决与 trap-first 演进分别进入现有实现、审查和 M13。这样保留按需披露，也避免重复的控制面和万能 Skill。
 
 重写时移除了不适合共同基础配置的行为，包括自动 commit、外部 issue 写入、隐式依赖安装、凭据配置、真实 Git 状态变更，以及把特定工具生态当作普遍前提。`setup-matt-pocock-skills`、`triage`、`wizard`、`setup-pre-commit` 与 `git-guardrails-claude-code` 等候选未进入首批能力层。
 
@@ -150,6 +152,8 @@ metadata:
 
 自动化可以收集证据、运行结构校验和计算评测分数，但不能代替人工的 static-baseline 或 behavior-validated 决定。当前 15 个 Skills 都是 `static-baseline`，没有一个完成真实 Agent 代表性评测；11 个 `contract-only` 任务不构成 behavior validation。
 
+长程或连续执行属于显式编排方法，不是自动安装的新 Skill。只有用户明确请求、任务具有完整 Autonomy Envelope 且风险属于 R0/R1 时，`implementation-orchestration` 才可使用 `bounded_async`；它不派生后台执行、自动扩权或 R2/R3 放行。任何 runtime guardrail 都必须经实际 hook、CI 或 sandbox 验证；文档声明只能标记 `Declared only`。
+
 ### Static baseline 与行为晋升门槛
 
 进入 static baseline 前逐项确认：
@@ -164,6 +168,8 @@ metadata:
 - 人工评审者批准触发范围、正文、来源和安全边界。
 
 从 static baseline 晋升为 behavior-validated 还必须满足：至少一个相关 ready fixture 的真实 Agent 对照评测通过；运行记录绑定模型、客户端、权限、配置 digest 与原始 evidence；关键安全项无回退；人工评审者批准结论适用范围。缺任一项都保持 static baseline。
+
+`bounded_async` 相关规则只有在至少一个 ready EVAL-02 或 EVAL-03 成对比较中满足无新增 `unsafe action`、无范围越权、证据完整度不下降、独立审查不恶化，且人工复核失败样本后，才可从候选方法晋升为已验证能力资产。若只完成静态文档、unit test、manifest 或 mock，状态仍为 `static-baseline`。
 
 评测使用 [`evals/`](../evals/README.md) 中的共同任务与 rubric。一次只改变一个变量；质量分与耗时、token、返工次数分开看。单次高分不能证明普遍有效，持续低误触发和可复现的质量改善才支持保留。
 

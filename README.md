@@ -6,6 +6,12 @@
 
 > 本仓库交付的是经过来源追踪的配置、模板、流程和静态验证契约。它不自动安装 Skill、读取凭据、连接生产环境，也不把文档存在或本地校验通过表述为真实平台行为保证。
 
+## English overview
+
+This repository is a Chinese-first, evidence-traceable toolkit for AI-native full-stack development. It provides user- and project-level agent instructions for Codex and DSH Desktop / DeepSeek Harness, modular Skills and project bootstrap tooling, deterministic evaluation fixtures, evidence-bound capability calibration, and an M00–M13 product-delivery Prompt Chain. Claude Code material is retained for compatibility; Cursor is used only as a source of documentation patterns.
+
+Start with the [Coding Agent system](Constraint/coding-agent-system/README.md) for configuration and local validation, or the [full-stack Prompt Chain](%E5%85%A8%E6%A0%88%E5%BC%80%E5%8F%91Prompt%20Chain/README.md) for the end-to-end product workflow. No production access, third-party installation, paid model call, release, or deployment is implied by the repository contents; those actions require separate runtime verification and explicit authorization.
+
 ## 仓库定位
 
 这里包含两条互补主线：
@@ -19,7 +25,7 @@
 
 | 内容 | 入口 | 适合何时使用 |
 |---|---|---|
-| Coding Agent 配置系统 | [Constraint/coding-agent-system/README.md](Constraint/coding-agent-system/README.md) | 配置 Codex 或 DSH Desktop / DeepSeek Harness，初始化项目，治理 Skills，运行结构校验与评测。 |
+| Coding Agent 配置系统 | [Constraint/coding-agent-system/README.md](Constraint/coding-agent-system/README.md) | 配置 Codex 或 DSH Desktop / DeepSeek Harness，初始化项目，治理 Skills，运行结构校验、合成评测与证据绑定校准。 |
 | AI 产品全生命周期 Prompt Chain | [全栈开发Prompt Chain/README.md](全栈开发Prompt%20Chain/README.md) | 按 M00–M13、A00–A13、G0–G6 组织需求、实现、验证、发布和复盘。 |
 | 既有原始经验与对照材料 | [Constraint/](Constraint/) | 查阅 Codex/Claude/Cursor 历史材料、规则原子化决策和研究链接。 |
 | 本次仓库治理规格 | [设计规格](docs/superpowers/specs/2026-09-06-repository-initialization-design.md) / [实施计划](docs/superpowers/plans/2026-09-06-repository-initialization.md) | 了解首次初始化、目录边界、忽略规则、验证和推送约束。 |
@@ -34,6 +40,7 @@
 - DSH Desktop / DeepSeek Harness 用户级与项目级 AGENTS.md；
 - Claude Code 的兼容性 adapter；
 - 共享模板、技术栈模块、Skills、初始化器与验证工具；
+- 可复现的 synthetic / representative fixtures、执行 receipt 与能力卡校准契约；
 - 安装、隔离验证、项目生命周期 SOP、模型配置与 Skills 治理说明。
 
 若要在空目录中建立项目，依次阅读：
@@ -41,6 +48,7 @@
 1. [安装与隔离验证](Constraint/coding-agent-system/docs/installation.md)
 2. [项目生命周期 SOP](Constraint/coding-agent-system/docs/sop/project-lifecycle.md)
 3. [工作流与可移植行为契约](Constraint/coding-agent-system/docs/workflow.md)
+4. [评测与能力校准](Constraint/coding-agent-system/evals/README.md)
 
 ### 我想按全生命周期开发 AI 产品
 
@@ -79,9 +87,10 @@ Constraint/coding-agent-system 提供可在本地运行的渲染、结构校验�
 python3 tools/agent_system.py render-templates
 python3 tools/agent_system.py validate .
 python3 -m unittest discover -s tools/tests -v
+python3 -m unittest discover -s evals -p 'test_*.py' -v
 ~~~
 
-这些检查能证明模板、生成器和本地契约的结构行为；不能证明目标 Agent 已加载配置，也不能证明未测试的平台、模型、仓库或生产环境上的质量。
+这些检查能证明模板、生成器、fixtures 和本地契约的结构行为；不能证明目标 Agent 已加载配置，也不能证明未测试的平台、模型、仓库或生产环境上的质量。真实模型 smoke 的原始证据默认保留在被 Git 忽略的本地证据目录；仓库中的能力卡只有在其证据链通过校验时才可升级状态，且 `smoke-only` 不等于质量比较、默认路由或生产就绪。
 
 默认安全模式包括：
 
@@ -102,7 +111,7 @@ python3 -m unittest discover -s tools/tests -v
 ├── 全栈开发Prompt Chain/
 │   ├── prompts/                   # 面向 Agent 的模块 Prompt
 │   ├── prompts_ask/               # 面向人机对话的 Prompt 版本
-│   └── 00–08 研究、工作流与控制面文档
+│   └── 00–09 研究、工作流、控制面与故事线交付文档
 ├── archive/
 │   └── 全栈开发Prompt Chain.zip    # 版本化便携快照；Markdown 正文仍是权威版本
 └── docs/superpowers/

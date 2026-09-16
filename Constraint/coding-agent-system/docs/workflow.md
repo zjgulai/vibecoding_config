@@ -5,7 +5,7 @@ module: coding-agent-system
 topic: full-stack-agent-workflow
 status: stable
 created: 2026-08-29
-updated: 2026-08-30
+updated: 2026-09-15
 owner: self
 source: human+ai
 ---
@@ -51,6 +51,17 @@ Implement ──► Verify ──失败──► Debug / 修正
 
 小而明确的低风险任务可以走 fast path：`定位 → 最小改动 → 相关验证 → 汇报`。不要为一行确定性修改强制生成完整规格和 tickets。跨模块、用户可见、数据或权限相关的任务应走完整流程。
 
+### 条件式规范到目标交付
+
+当且仅当同一批准规格需要产生两个以上真实目标表示，或目标间已有可测语义漂移时，在普通纵向流程中加入完整多目标路径：
+
+```text
+可证伪故事假设 → canonical product contract → shared transforms
+→ target adapters → target-native implementation → reference + native verification
+```
+
+单目标只有在存在不可忽略、不能由简单配置表达的平台/协议/provider 差异时，才引入一个窄 target adapter，并在启用前定义 native validator；它不自动触发 shared transform、IR、生成器或目标矩阵。两种模式都不改变权限、Gate 或 artifact：故事证据进入 A03/A04，共同契约进入 A05，目标边界与影响半径进入 A07，实现和原生证据仍进入 A08/A09。细化方法见 [`全栈开发 Prompt Chain/09-故事线驱动与编译式交付模式.md`](../../../全栈开发Prompt%20Chain/09-故事线驱动与编译式交付模式.md)。
+
 ## 可移植的全栈行为与任务编排提示词
 
 ### 使用方式
@@ -95,12 +106,18 @@ Implement ──► Verify ──失败──► Debug / 修正
 
 自然语言指令不是安全边界。不得通过关闭校验、放宽权限、绕过 sandbox、硬编码凭据或吞掉错误来完成任务。
 
+### 有界连续执行
+
+`bounded_async` 仅适用于当前任务已声明完整 Autonomy Envelope 的 R0/R1 本地工作。它必须限定目标/DoD、write scope、tool/data scope、最窄反馈、停止条件、enforcement evidence 和 handoff；默认仍为 `interactive`。R2 只准备方案、作者验证和审证材料，R3 只形成 proposal、runbook、dry-run 或获授权只读证据。范围、风险、验证、授权或环境变化时停止，不把运行时间、单次成功或 Agent 自述视为质量证据。
+
 ## 产品与规格
 
 1. 目标或用户流程含糊时，先澄清会改变架构、数据、权限、UX 或兼容性的决策。可从仓库查明的事实不要反问用户。
 2. 把确认结果写成可观察行为：actors、主流程、失败行为、边界、非目标和验收场景。
 3. 每个需求至少对应一个验证方式；每个验证项必须追溯到需求或明确风险。
-4. 大任务拆成可独立演示、可独立验证、完成后保持仓库可用的垂直 slices。不要只按 frontend/backend/database 横切。
+4. 高风险需求明确可替换实现、不可替换行为、不变量/失败模式、最小验证和兼容/恢复约束；ADR、API、schema、权限或迁移决定不得隐藏在 implementation instruction 中。
+5. 当前任务需要局部理解时，使用 Agent-ready module pack：权威入口、读写范围、现有反馈命令、mock/依赖、接口/不变量、失败/恢复、整合 owner 与明确禁止项。每项来自仓库事实或受控决定；未知项写 `Unknown`。
+6. 大任务拆成可独立演示、可独立验证、完成后保持仓库可用的垂直 slices。不要只按 frontend/backend/database 横切。
 
 ## 实现
 
@@ -111,6 +128,7 @@ Implement ──► Verify ──失败──► Debug / 修正
 5. 数据库改动必须说明 forward path、rollback/repair path、兼容窗口和验证方式。未经授权不连接或写入真实环境。
 6. 前端改动同时检查功能、加载/空/错误状态、响应式布局、键盘交互、可访问性和视觉结果。能运行页面时使用实际页面或截图验证。
 7. 后端改动同时检查输入边界、认证与授权、错误语义、幂等性、并发/事务边界、日志脱敏和兼容性。
+8. 只有 R0/R1 且 Autonomy Envelope 完整时，才能循环「最窄反馈 → 最小修改 → 重跑同一检查 → 记录证据」。遇到新依赖、架构/API/schema/auth/迁移、范围外文件、外部动作、敏感数据、连续不收敛或证据变弱时停止并交接。
 
 ## 调试与失败处理
 
@@ -145,6 +163,7 @@ Implement ──► Verify ──失败──► Debug / 修正
 3. 不修改、删除、跳过测试来制造通过。工具输出截断、命令未运行或环境不可用时，不声称通过。
 4. UI 变化需要运行时或截图证据；migration 需要隔离数据库或等价 dry-run 证据；外部调用需要区分 mock、sandbox 与真实副作用。
 5. 完成前独立检查 Spec 与 Standards 两个轴：是否做对需求，是否符合工程、安全与兼容性规则。
+6. 先列 Feedback capability matrix：仅记录实际存在的检查、命令/工具、是否本地可运行、证据层级和不可用原因；不创建假命令。属性测试只在存在清晰不变量、生成域和 oracle 时采用。作者验证与独立审证必须在上下文、证据方法、审查者或 CI 中至少有一项实质分离。
 
 ## 完成定义与汇报
 
@@ -397,6 +416,13 @@ Anthropic 官方建议先探索、再计划、再编码，并为 agent 提供可
 - 当前预期风险：R1。
 - 若发现 schema、权限、架构、外部副作用或破坏性动作，先停止并说明选择、影响、回滚与验证。
 
+## Autonomy mode
+- `interactive`（默认）或 `bounded_async`。
+- 未提供完整任务级 Autonomy Envelope 时，保持 `interactive`。
+
+## Autonomy Envelope
+- 指向控制面中的当前任务范围、反馈、停止、enforcement evidence 与 handoff；它不扩大权限或替代 Gate。
+
 ## Deliverable
 - 实际改动、原因、新鲜验证证据、未完成项与残余风险。
 ```
@@ -405,6 +431,7 @@ Anthropic 官方建议先探索、再计划、再编码，并为 agent 提供可
 
 - 只把反复出现且会改变 agent 决策的内容晋升为长期规则。
 - 失败、用户纠正或测试失败先进入候选记录；人工审查后再更新用户短常驻内核、项目画像、局部规则或 Skill。
+- 维护唯一调优循环：失败 → candidate → review → trial → approved/rejected/retired。一次错误不能自动新增常驻规则；缺少可复验证据、窄适用范围或 holdout 的候选保持 park 或 more-evidence。
 - 平台新增能力先在隔离任务中验证，再写入适配文档。
 - 工作流升级使用相同任务与 rubric 做前后对比；不要凭单次主观体验替换团队基线。
 - DeepSeek Harness 仍处于 developer preview，其 plugin、mode 与配置变化要单独复核。[DeepSeek Harness](https://www.deepseek.com/harness/en/)

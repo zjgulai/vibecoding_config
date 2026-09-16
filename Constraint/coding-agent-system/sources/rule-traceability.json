@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "verified_on": "2026-09-02",
+  "verified_on": "2026-09-15",
   "scope": {
     "local_source_count": 31,
     "ref_link_unique_count": 7,
@@ -289,6 +289,206 @@
       "eval_cases": ["EVAL-05"],
       "status": "static-traceability; eval-contract-only; real-agent-not-run",
       "expiry_signal": "Brand or design-system changes, platform accessibility requirement changes, or behavior evals showing excessive weakening or misclassification require review."
+    },
+    {
+      "id": "RUL-023",
+      "principle": "Allow sustained agent execution only through a task-specific Autonomy Envelope that binds risk, human responsibility, write/tool/data scope, feedback, stop conditions, enforcement evidence and handoff; it never expands R0-R3 authority or treats agent duration as a quality target.",
+      "sources": ["RSP-036", "RSP-001", "RSP-004", "RSP-035"],
+      "decision": "adopt-with-conditions",
+      "destination": {
+        "layer": "control-plane-and-bounded-orchestration",
+        "paths": [
+          "../../全栈开发Prompt Chain/08-AI-Native-SDLC控制面规范.md",
+          "../../全栈开发Prompt Chain/prompts/00-全局上下文与流程控制.md",
+          "../../全栈开发Prompt Chain/prompts/99-端到端Prompt-Chain.md",
+          "docs/workflow.md",
+          "skills/implementation-orchestration/SKILL.md",
+          "evals/tasks/02-vertical-full-stack-feature.md",
+          "evals/tasks/03-systematic-debugging.md",
+          "evals/run_synthetic_pair.py",
+          "evals/fixtures/synthetic/02-vertical-full-stack-feature/cases/unauthorized-external-action.json",
+          "evals/synthetic-configurations/02-vertical-full-stack-feature/unauthorized-external-action-baseline-v1/control.json",
+          "evals/synthetic-configurations/02-vertical-full-stack-feature/unauthorized-external-action-candidate-v1/control.json"
+        ]
+      },
+      "artifacts": [
+        {"path": "../../全栈开发Prompt Chain/08-AI-Native-SDLC控制面规范.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/00-全局上下文与流程控制.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/99-端到端Prompt-Chain.md", "status": "implemented"},
+        {"path": "docs/workflow.md", "status": "implemented"},
+        {"path": "skills/implementation-orchestration/SKILL.md", "status": "implemented"},
+        {"path": "evals/tasks/02-vertical-full-stack-feature.md", "status": "implemented"},
+        {"path": "evals/tasks/03-systematic-debugging.md", "status": "implemented"},
+        {"path": "evals/run_synthetic_pair.py", "status": "implemented-with-planned-eval"},
+        {"path": "evals/fixtures/synthetic/02-vertical-full-stack-feature/cases/unauthorized-external-action.json", "status": "implemented-with-planned-eval"},
+        {"path": "evals/synthetic-configurations/02-vertical-full-stack-feature/unauthorized-external-action-baseline-v1/control.json", "status": "implemented-with-planned-eval"},
+        {"path": "evals/synthetic-configurations/02-vertical-full-stack-feature/unauthorized-external-action-candidate-v1/control.json", "status": "implemented-with-planned-eval"}
+      ],
+      "eval_cases": ["EVAL-02", "EVAL-03"],
+      "status": "static-traceability; eval-contract-only; synthetic-harness-only; deterministic-stub; real-agent-not-run",
+      "expiry_signal": "A platform's verified permission or isolation semantics change, a ready paired fixture shows increased scope breaches or review load, or an equivalent control becomes available in the canonical platform adapter."
+    },
+    {
+      "id": "RUL-024",
+      "principle": "Treat a product story as a falsifiable workflow hypothesis and choose the cheapest prototype that exposes the current uncertainty: a capability spike for solvability, a UI prototype for interaction or usability.",
+      "sources": ["RSP-037"],
+      "decision": "adopt-with-conditions",
+      "destination": {
+        "layer": "product-discovery-and-prototyping",
+        "paths": [
+          "../../全栈开发Prompt Chain/09-故事线驱动与编译式交付模式.md",
+          "../../全栈开发Prompt Chain/prompts/03-用户研究与问题定义.md",
+          "../../全栈开发Prompt Chain/prompts/04-产品策略与范围决策.md",
+          "../../全栈开发Prompt Chain/prompts/05-领域模型与产品规格.md",
+          "../../全栈开发Prompt Chain/prompts/06-原型与UX验证.md",
+          "../../全栈开发Prompt Chain/prompts_ask/03-用户研究与问题定义.md",
+          "../../全栈开发Prompt Chain/prompts_ask/04-产品策略与范围决策.md",
+          "../../全栈开发Prompt Chain/prompts_ask/05-领域模型与产品规格.md",
+          "../../全栈开发Prompt Chain/prompts_ask/06-原型与UX验证.md",
+          "skills/safe-prototyping/SKILL.md"
+        ]
+      },
+      "artifacts": [
+        {"path": "../../全栈开发Prompt Chain/09-故事线驱动与编译式交付模式.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/03-用户研究与问题定义.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/04-产品策略与范围决策.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/05-领域模型与产品规格.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/06-原型与UX验证.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/03-用户研究与问题定义.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/04-产品策略与范围决策.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/05-领域模型与产品规格.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/06-原型与UX验证.md", "status": "implemented"},
+        {"path": "skills/safe-prototyping/SKILL.md", "status": "implemented"}
+      ],
+      "eval_cases": ["EVAL-01"],
+      "status": "static-traceability; eval-contract-only; real-agent-not-run",
+      "expiry_signal": "Observed user behavior contradicts the story, the prototype no longer isolates the named uncertainty, or original transcript evidence becomes available and changes the interpretation."
+    },
+    {
+      "id": "RUL-025",
+      "principle": "Use shared transforms and a cross-target matrix only for multiple real targets or measurable cross-target drift; a single target may use one narrow adapter only for a non-trivial platform difference that simple configuration cannot express and a native validator can detect.",
+      "sources": ["RSP-038"],
+      "decision": "adopt-with-conditions",
+      "destination": {
+        "layer": "conditional-spec-to-target-pipeline",
+        "paths": [
+          "../../全栈开发Prompt Chain/08-AI-Native-SDLC控制面规范.md",
+          "../../全栈开发Prompt Chain/09-故事线驱动与编译式交付模式.md",
+          "../../全栈开发Prompt Chain/03-AI产品全生命周期映射.md",
+          "../../全栈开发Prompt Chain/04-模块化Skills工作流.md",
+          "../../全栈开发Prompt Chain/06-Prompt-Chain使用手册.md",
+          "docs/workflow.md",
+          "../../全栈开发Prompt Chain/prompts/07-架构设计与任务拆解.md",
+          "../../全栈开发Prompt Chain/prompts/08-全栈实现与TDD.md",
+          "../../全栈开发Prompt Chain/prompts/09-AI-Eval与质量安全.md",
+          "../../全栈开发Prompt Chain/prompts_ask/07-架构设计与任务拆解.md",
+          "../../全栈开发Prompt Chain/prompts_ask/08-全栈实现与TDD.md",
+          "../../全栈开发Prompt Chain/prompts_ask/09-AI-Eval与质量安全.md",
+          "skills/codebase-design/SKILL.md",
+          "skills/codebase-design/references/spec-to-target-pipeline.md",
+          "evals/run_synthetic_pair.py",
+          "evals/fixtures/synthetic/02-vertical-full-stack-feature/cases/adjacent-adapter-regression.json",
+          "evals/synthetic-configurations/02-vertical-full-stack-feature/adjacent-adapter-regression-baseline-v1/control.json",
+          "evals/synthetic-configurations/02-vertical-full-stack-feature/adjacent-adapter-regression-candidate-v1/control.json"
+        ]
+      },
+      "artifacts": [
+        {"path": "../../全栈开发Prompt Chain/08-AI-Native-SDLC控制面规范.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/09-故事线驱动与编译式交付模式.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/03-AI产品全生命周期映射.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/04-模块化Skills工作流.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/06-Prompt-Chain使用手册.md", "status": "implemented"},
+        {"path": "docs/workflow.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/07-架构设计与任务拆解.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/08-全栈实现与TDD.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/09-AI-Eval与质量安全.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/07-架构设计与任务拆解.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/08-全栈实现与TDD.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/09-AI-Eval与质量安全.md", "status": "implemented"},
+        {"path": "skills/codebase-design/SKILL.md", "status": "implemented"},
+        {"path": "skills/codebase-design/references/spec-to-target-pipeline.md", "status": "implemented"},
+        {"path": "evals/run_synthetic_pair.py", "status": "implemented-with-planned-eval"},
+        {"path": "evals/fixtures/synthetic/02-vertical-full-stack-feature/cases/adjacent-adapter-regression.json", "status": "implemented-with-planned-eval"},
+        {"path": "evals/synthetic-configurations/02-vertical-full-stack-feature/adjacent-adapter-regression-baseline-v1/control.json", "status": "implemented-with-planned-eval"},
+        {"path": "evals/synthetic-configurations/02-vertical-full-stack-feature/adjacent-adapter-regression-candidate-v1/control.json", "status": "implemented-with-planned-eval"}
+      ],
+      "eval_cases": ["EVAL-02", "EVAL-07"],
+      "status": "static-traceability; eval-contract-only; synthetic-harness-only; deterministic-stub; real-agent-not-run",
+      "expiry_signal": "The product returns to a simple single path, target contracts diverge intentionally, the platform difference becomes ordinary configuration, or native validators no longer exercise the deployed runtimes."
+    },
+    {
+      "id": "RUL-026",
+      "principle": "Resolve implementation conflicts by explicit intent authority, sweep semantic twins, and let an independent read-only reviewer map each completion claim to an observation and four-state verdict.",
+      "sources": ["RSP-039"],
+      "decision": "rewrite",
+      "destination": {
+        "layer": "implementation-and-independent-review",
+        "paths": [
+          "skills/implementation-orchestration/SKILL.md",
+          "skills/two-axis-code-review/SKILL.md",
+          "../../全栈开发Prompt Chain/06-Prompt-Chain使用手册.md",
+          "../../全栈开发Prompt Chain/prompts/08-全栈实现与TDD.md",
+          "../../全栈开发Prompt Chain/prompts/09-AI-Eval与质量安全.md",
+          "../../全栈开发Prompt Chain/prompts/11-可观测性与反馈闭环.md",
+          "../../全栈开发Prompt Chain/prompts_ask/08-全栈实现与TDD.md",
+          "../../全栈开发Prompt Chain/prompts_ask/09-AI-Eval与质量安全.md",
+          "../../全栈开发Prompt Chain/prompts_ask/11-可观测性与反馈闭环.md",
+          "evals/run_synthetic_pair.py",
+          "evals/fixtures/synthetic/02-vertical-full-stack-feature/cases/spec-test-conflict.json",
+          "evals/synthetic-configurations/02-vertical-full-stack-feature/spec-test-conflict-baseline-v1/control.json",
+          "evals/synthetic-configurations/02-vertical-full-stack-feature/spec-test-conflict-candidate-v1/control.json"
+        ]
+      },
+      "artifacts": [
+        {"path": "skills/implementation-orchestration/SKILL.md", "status": "implemented"},
+        {"path": "skills/two-axis-code-review/SKILL.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/06-Prompt-Chain使用手册.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/08-全栈实现与TDD.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/09-AI-Eval与质量安全.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/11-可观测性与反馈闭环.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/08-全栈实现与TDD.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/09-AI-Eval与质量安全.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/11-可观测性与反馈闭环.md", "status": "implemented"},
+        {"path": "evals/run_synthetic_pair.py", "status": "implemented-with-planned-eval"},
+        {"path": "evals/fixtures/synthetic/02-vertical-full-stack-feature/cases/spec-test-conflict.json", "status": "implemented-with-planned-eval"},
+        {"path": "evals/synthetic-configurations/02-vertical-full-stack-feature/spec-test-conflict-baseline-v1/control.json", "status": "implemented-with-planned-eval"},
+        {"path": "evals/synthetic-configurations/02-vertical-full-stack-feature/spec-test-conflict-candidate-v1/control.json", "status": "implemented-with-planned-eval"}
+      ],
+      "eval_cases": ["EVAL-02", "EVAL-03", "EVAL-06", "EVAL-07"],
+      "status": "static-traceability; eval-contract-only; synthetic-harness-only; deterministic-stub; real-agent-not-run",
+      "expiry_signal": "Conflict tests show the authority order is wrong, twin sweeps create systematic unrelated edits, or reviewers cannot reproduce verdicts from cited observations."
+    },
+    {
+      "id": "RUL-027",
+      "principle": "Treat repeated work only as a Skill discovery signal; promote a candidate through an adapter, trap fixture, answer or oracle, baseline-candidate smoke comparison, retained null and negative results, and human review.",
+      "sources": ["RSP-037", "RSP-039"],
+      "decision": "rewrite",
+      "destination": {
+        "layer": "skill-evolution-governance",
+        "paths": [
+          "../../全栈开发Prompt Chain/09-故事线驱动与编译式交付模式.md",
+          "../../全栈开发Prompt Chain/prompts/13-复盘与Skill自进化.md",
+          "../../全栈开发Prompt Chain/prompts_ask/13-复盘与Skill自进化.md",
+          "docs/skills-governance.md",
+          "evals/run_synthetic_pair.py",
+          "evals/fixtures/synthetic/02-vertical-full-stack-feature/cases/no-benefit-skill.json",
+          "evals/synthetic-configurations/02-vertical-full-stack-feature/no-benefit-skill-baseline-v1/control.json",
+          "evals/synthetic-configurations/02-vertical-full-stack-feature/no-benefit-skill-candidate-v1/control.json"
+        ]
+      },
+      "artifacts": [
+        {"path": "../../全栈开发Prompt Chain/09-故事线驱动与编译式交付模式.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts/13-复盘与Skill自进化.md", "status": "implemented"},
+        {"path": "../../全栈开发Prompt Chain/prompts_ask/13-复盘与Skill自进化.md", "status": "implemented"},
+        {"path": "docs/skills-governance.md", "status": "implemented"},
+        {"path": "evals/run_synthetic_pair.py", "status": "implemented-with-planned-eval"},
+        {"path": "evals/fixtures/synthetic/02-vertical-full-stack-feature/cases/no-benefit-skill.json", "status": "implemented-with-planned-eval"},
+        {"path": "evals/synthetic-configurations/02-vertical-full-stack-feature/no-benefit-skill-baseline-v1/control.json", "status": "implemented-with-planned-eval"},
+        {"path": "evals/synthetic-configurations/02-vertical-full-stack-feature/no-benefit-skill-candidate-v1/control.json", "status": "implemented-with-planned-eval"}
+      ],
+      "eval_cases": ["EVAL-02", "EVAL-07"],
+      "status": "static-traceability; eval-contract-only; synthetic-harness-only; deterministic-stub; real-agent-not-run",
+      "expiry_signal": "A candidate lacks a reproducible trap or oracle, repeated runs remain null or negative, human review rejects the behavior, or the upstream task no longer recurs."
     }
   ]
 }

@@ -76,6 +76,7 @@ PRODUCTION_ACCESS=DENY
 - [`06-Prompt-Chain使用手册.md`](06-Prompt-Chain使用手册.md)：变量、产物交接和恢复方法。
 - [`07-平台适配与安全边界.md`](07-平台适配与安全边界.md)：Codex、Claude Code、DSH 调用差异和审批边界。
 - [`08-AI-Native-SDLC控制面规范.md`](08-AI-Native-SDLC控制面规范.md)：跨模块 Control Contract、状态语义、独立验证、能力资产与回退规则。
+- [`09-故事线驱动与编译式交付模式.md`](09-故事线驱动与编译式交付模式.md)：把故事假设、能力 spike、多目标交付与 claim 审证映射到既有控制面，并记录采用/拒绝边界。
 - [`report-source.md`](report-source.md)：研究主张与来源账本。
 
 ## 证据边界

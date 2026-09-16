@@ -1,18 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.invalid/coding-agent-fixture-manifest.schema.json",
-  "title": "Coding Agent Representative Fixture Manifest",
+  "title": "Coding Agent Fixture Manifest",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "schema_version",
     "manifest_revision",
+    "evidence_scope",
     "digest_contract",
     "fixtures"
   ],
   "properties": {
-    "schema_version": {"const": "1"},
+    "schema_version": {"const": "2"},
     "manifest_revision": {"type": "string", "pattern": "\\S"},
+    "evidence_scope": {
+      "enum": ["representative", "synthetic-harness-only"]
+    },
     "digest_contract": {
       "type": "object",
       "additionalProperties": false,
@@ -48,25 +52,59 @@
     },
     "fixtures": {
       "type": "array",
-      "minItems": 11,
+      "minItems": 1,
       "maxItems": 11,
       "uniqueItems": true,
-      "items": {"$ref": "#/$defs/fixture"},
-      "allOf": [
-        {"contains": {"properties": {"task_id": {"const": "01-product-discovery"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "02-vertical-full-stack-feature"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "03-systematic-debugging"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "04-postgresql-migration"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "05-frontend-visual-quality"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "06-two-axis-review"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "07-instruction-audit"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "08-project-profile"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "09-memory-governance"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "10-instruction-conflict"}}, "required": ["task_id"]}},
-        {"contains": {"properties": {"task_id": {"const": "11-local-rule-linked-change"}}, "required": ["task_id"]}}
-      ]
+      "items": {"$ref": "#/$defs/fixture"}
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"evidence_scope": {"const": "representative"}},
+        "required": ["evidence_scope"]
+      },
+      "then": {
+        "properties": {
+          "fixtures": {
+            "minItems": 11,
+            "maxItems": 11,
+            "allOf": [
+              {"contains": {"properties": {"task_id": {"const": "01-product-discovery"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "02-vertical-full-stack-feature"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "03-systematic-debugging"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "04-postgresql-migration"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "05-frontend-visual-quality"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "06-two-axis-review"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "07-instruction-audit"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "08-project-profile"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "09-memory-governance"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "10-instruction-conflict"}}, "required": ["task_id"]}},
+              {"contains": {"properties": {"task_id": {"const": "11-local-rule-linked-change"}}, "required": ["task_id"]}}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"evidence_scope": {"const": "synthetic-harness-only"}},
+        "required": ["evidence_scope"]
+      },
+      "then": {
+        "properties": {
+          "fixtures": {
+            "minItems": 1,
+            "maxItems": 1,
+            "contains": {
+              "properties": {"task_id": {"const": "02-vertical-full-stack-feature"}},
+              "required": ["task_id"]
+            }
+          }
+        }
+      }
+    }
+  ],
   "$defs": {
     "argv": {
       "type": "array",

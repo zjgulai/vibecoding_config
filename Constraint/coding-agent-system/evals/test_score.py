@@ -31,6 +31,7 @@ def make_record(**overrides: object) -> dict:
         "initial_state_digest": SHA_A,
         "manifest_revision": "manifest-v1",
         "manifest_digest": SHA_D,
+        "evidence_scope": "representative",
         "agent": "codex",
         "agent_version": "codex-cli-1",
         "model": "gpt-test",
@@ -104,6 +105,29 @@ class ScoreTests(unittest.TestCase):
         self.assertIsNone(result["quality_score"])
         self.assertIsNone(result["final_score"])
         self.assertFalse(result["promotion_eligible"])
+
+    def test_synthetic_record_never_emits_quality_or_promotion(self) -> None:
+        record = make_record(evidence_scope="synthetic-harness-only")
+        result = validate_and_compute(record, assessment_bound=False)
+
+        self.assertEqual(result["scope_result"], "synthetic-harness-only")
+        self.assertIsNone(result["quality_score"])
+        self.assertIsNone(result["final_score"])
+        self.assertIsNone(result["declared_quality_score"])
+        self.assertIsNone(result["declared_final_score"])
+        self.assertFalse(result["completed_quality_eligible"])
+        self.assertFalse(result["promotion_eligible"])
+
+    def test_synthetic_record_rejects_assessor_binding(self) -> None:
+        record = make_record(
+            evidence_scope="synthetic-harness-only",
+            assessment_binding_status="assessor-bound",
+            assessment_path="assessment.json",
+            assessment_digest=SHA_A,
+        )
+
+        with self.assertRaisesRegex(ValueError, "synthetic-harness-only"):
+            score.validate_record(record)
 
     def test_penalties_reduce_final_score_without_going_below_zero(self) -> None:
         record = make_record(

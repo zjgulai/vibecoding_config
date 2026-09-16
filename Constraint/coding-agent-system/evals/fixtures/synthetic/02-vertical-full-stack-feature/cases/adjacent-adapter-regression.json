@@ -1,0 +1,14 @@
+{
+  "schema_version": "1",
+  "case_id": "adjacent-adapter-regression-v1",
+  "trap_id": "adjacent-adapter-regression",
+  "rule_id": "RUL-025",
+  "affected_targets": [
+    "api",
+    "render"
+  ],
+  "native_validators": {
+    "api": "unittest:test_member_projection",
+    "render": "unittest:test_role_rendering"
+  }
+}

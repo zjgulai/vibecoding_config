@@ -22,9 +22,11 @@
 原则：
 1. 分开 incident facts、contributing factors、decision quality、process gap、tool gap、outcome；以当时可获得证据评估，避免结果论。候选经验须有可复现 evidence、窄 scope、counterexample、冲突/风险、expiry；secret、PII、原始会话、一次性路径不可进入 Memory。
 2. 正确选载体：跨项目稳定规则→user kernel candidate；项目事实→project profile/local docs；多步骤判断→Skill；路径/技术栈约束→local module；确定性阻断→hook/CI；测试可捕获行为→test/eval。
-3. 固定演进循环：harvest sanitized cases → mine recurring task → split replay/holdout → baseline → bounded single-variable edit → replay → held-out gate → stage → human adopt。不得同时改 benchmark 与被测对象；保留 no-regression cases，失败写 journal，不删除失败样本；限制 edit budget/sessions/tasks/并行 proposal/轮次，同类连续两次失败则 park 并停止非收敛自改。
-4. G6 只批准 adoption design，不授权写入。实际修改 Prompt、Skill、AGENTS/CLAUDE、project rule 或长期 Memory，须同时 MODE=APPLY 与绑定 target files、exact diff、risk level、backup/rollback、verification、expiry 的 G3/G4 `LOCAL_CHANGE_AUTHORIZATION`；R2 目标还须经过 G3/G4。任一项缺失时仅输出候选 diff 并 STOP。
-5. 向 registry、远端仓库、plugin catalog 或其他外部系统 publish/adopt，另需对象级 R3（Target、Action、Expected effect、Credential scope〔不含值〕、Cost、Rollback、Verification、Idempotency/duplicate guard、Expiry）。auto-adopt/auto-publish 禁止。未执行 receipt 必须写 `Not adopted / no persistent change`。
+3. “同类工作重复三次”只是一条发现信号，不是自动 Skill 化或采纳阈值。还须证明任务边界稳定、输入/输出可描述、存在可复现 failure/trap，且相对普通 Prompt 有待验证的决策价值；否则保留为 candidate/needs-evidence。
+4. 固定演进循环：harvest sanitized cases → mine recurring task → split replay/holdout → baseline → bounded single-variable edit → replay → held-out gate → stage → human adopt。Skill 候选必须形成 `adapter + trap fixture + answer/oracle + smoke A/B` bundle：adapter 写触发/输入/输出/权限/停止边界；trap 暴露易错决策点；oracle 可判定；A/B 固定任务、模型、配置、评分与 raw result。缺任一项不得晋升。
+5. 不得同时改 benchmark 与被测对象；保留 no-regression、null、negative 与失败 journal，不删除失败样本制造提升。仅使用合成 fixture、少量任务或少量重复运行时，结果只能称 `smoke`，不能称 benchmark、稳定提升或普适增益。限制 edit budget/sessions/tasks/并行 proposal/轮次，同类连续两次失败则 park 并停止非收敛自改。每次配置失败先分类为事实、候选规则、工具缺口、项目事实缺口或评测缺口；只有同类问题有可复验证据、窄适用范围且 holdout 不退化时，才提出单变量候选。
+6. G6 只批准 adoption design，不授权写入。实际修改 Prompt、Skill、AGENTS/CLAUDE、project rule 或长期 Memory，须同时 MODE=APPLY 与绑定 target files、exact diff、risk level、backup/rollback、verification、expiry 的 G3/G4 `LOCAL_CHANGE_AUTHORIZATION`；R2 目标还须经过 G3/G4。任一项缺失时仅输出候选 diff 并 STOP。
+7. 向 registry、远端仓库、plugin catalog 或其他外部系统 publish/adopt，另需对象级 R3（Target、Action、Expected effect、Credential scope〔不含值〕、Cost、Rollback、Verification、Idempotency/duplicate guard、Expiry）。auto-adopt/auto-publish 禁止。未执行 receipt 必须写 `Not adopted / no persistent change`。
 
 信息充分时先展示完成摘要（触发、证据、候选、评测、授权状态、风险、未决项、拟生成 A13），并只问：「确认生成 A13-retrospective.md 吗？」确认后才输出：
 
@@ -45,7 +47,14 @@
 基于当时可获得证据，不做结果论。
 ## Candidate learnings
 | ID | Observation | Evidence | Scope | Counterexample | Destination | Expiry |
+## Candidate classification
+事实 | 候选规则 | 工具缺口 | 项目事实缺口 | 评测缺口；每项写依据、下一补证据动作或 park 原因。
 ## Proposed evolution target
+## Skill candidate bundle
+- Adapter: trigger、inputs/outputs、decision points、authority、stop conditions。
+- Trap fixture: 最容易误判的情境与输入。
+- Answer/oracle: 可判定的期望与失败条件。
+- Smoke A/B: 固定任务、模型、配置、评分、原始结果和运行次数；合成/少量运行必须标为 `smoke`。
 ## Baseline and held-out evaluation plan
 ## Bounded proposed edit
 以 diff/明确变更描述呈现，不直接应用。
@@ -61,5 +70,5 @@ G6 design：Stage | Reject | Needs evidence | Approved design；`Approved design
 ## Handoff
 回到 M02/M03/M04/M08/M12，或不行动。
 
-完成标准：学习有证据与边界；benchmark 与被测对象不共同漂移；G6 design 与写入授权分离；候选不自动晋升；失败记录保留；提升表述限于实际评测范围。
+完成标准：学习有证据与边界；“重复三次”未被当作晋升阈值；Skill 候选 bundle 完整；benchmark 与被测对象不共同漂移；G6 design 与写入授权分离；候选不自动晋升；null/negative/失败记录保留；提升表述限于实际评测范围，合成或少量运行只称 smoke。
 ```

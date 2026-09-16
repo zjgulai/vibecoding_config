@@ -1,0 +1,248 @@
+{
+  "schema_version": "1",
+  "batch_id": "codex-eval10-real-smoke-2026-09-16-once-01",
+  "batch_revision": "2026-09-16.real-smoke.1",
+  "execution_mode": "authorized-smoke",
+  "purpose": "Execute exactly one receipt-bound Codex EVAL-10 connectivity smoke under the interactive authorization granted on 2026-09-16; no retry and no quality comparison.",
+  "fixture_binding": {
+    "state": "bound",
+    "manifest_path": "staged-inputs/fixture-manifest.calibration.json",
+    "manifest_digest": "sha256:9a2fa40100a009342de35b7e5428b79a18485b8f9d1f32cb10facabafa81381e",
+    "task_id": "10-instruction-conflict",
+    "task_revision": "2026-09-16.calibration-v1",
+    "fixture_id": "coding-agent-task-10",
+    "fixture_revision": "representative-readonly-v1",
+    "initial_state_digest": "sha256:e93d577be9afeecfbb95b156dc89c9f62ddeb64c9a8ae5832d99b0df32dbbb32",
+    "prompt_digest": "sha256:961845a95cfbdba980b826b96ca4f6fa631bc85b05cb25a86889a79d4ace26d4",
+    "oracle_revision": "sha256:c22e0cca9d2faae2e095f855b95aaae4d74aec40a7d279c115e972065d97ea8f"
+  },
+  "treatment": {
+    "mode": "none",
+    "variable": null,
+    "baseline": null,
+    "candidate": null,
+    "comparison_authorized": false
+  },
+  "fixed_controls": {
+    "repetitions_per_configuration": 1,
+    "workspace_mode": "read-only",
+    "prompt_source": "fixture-only",
+    "web_search_enabled": false,
+    "browser_enabled": false,
+    "mcp_enabled": false,
+    "external_side_effects_enabled": false,
+    "git_writes_enabled": false,
+    "retries": 0,
+    "oracle_required": true,
+    "raw_stdout_required": true,
+    "raw_stderr_required": true,
+    "receipt_required": true,
+    "smoke_observation_required": true
+  },
+  "data_egress": {
+    "state": "fixture-only-authorized",
+    "allowed_payloads": [
+      "synthetic-fixture-prompt"
+    ],
+    "forbidden_data": [
+      "credentials",
+      "secrets",
+      "environment-files",
+      "account-content",
+      "pii",
+      "repository-content-outside-fixture"
+    ]
+  },
+  "budget": {
+    "max_cli_invocations": 1,
+    "max_provider_requests": null,
+    "max_tasks": 1,
+    "max_repetitions_per_configuration": 1,
+    "max_retries": 0,
+    "max_wall_clock_seconds": 300,
+    "max_billed_cost_usd": null,
+    "billed_cost_limit_source": "unknown"
+  },
+  "authorization": {
+    "state": "authorized-once",
+    "authorized_platforms": [
+      "codex"
+    ],
+    "authorized_actions": [
+      "model-request",
+      "codex-client-network-transport",
+      "synthetic-fixture-prompt-egress",
+      "local-receipt-and-artifact-write",
+      "authorization-consumption-registry-write"
+    ],
+    "forbidden_actions": [
+      "retry",
+      "web-search",
+      "browser",
+      "mcp",
+      "agent-tool-use",
+      "credential-content-inspection",
+      "user-config-write",
+      "git-write",
+      "external-side-effect"
+    ],
+    "authorization_ref": "Constraint/coding-agent-system/evals/calibration/codex-eval10-authorization-grant-2026-09-16.json",
+    "expires_at": "2026-09-16T10:00:00+00:00"
+  },
+  "stop_conditions": [
+    {
+      "id": "control-digest-drift",
+      "action": "stop-no-retry",
+      "evidence_required": "Record the observed digest mismatch without weakening the frozen controls."
+    },
+    {
+      "id": "unresolved-model-alias",
+      "action": "stop-no-retry",
+      "evidence_required": "Record the unresolved model identifier; do not infer or silently substitute a model."
+    },
+    {
+      "id": "secret-access-required",
+      "action": "stop-no-retry",
+      "evidence_required": "Record that a secret would be required without reading or printing it."
+    },
+    {
+      "id": "unauthorized-network-tool",
+      "action": "stop-no-retry",
+      "evidence_required": "Record the attempted network or tool requirement without granting it."
+    },
+    {
+      "id": "unauthorized-write",
+      "action": "stop-no-retry",
+      "evidence_required": "Record the attempted write without relaxing the read-only boundary."
+    },
+    {
+      "id": "raw-output-secret-or-pii",
+      "action": "stop-no-retry",
+      "evidence_required": "Quarantine the raw artifact and record only a redacted incident reference."
+    },
+    {
+      "id": "receipt-or-oracle-incomplete",
+      "action": "stop-no-retry",
+      "evidence_required": "Preserve the incomplete cell as failed or stopped; never drop it from the batch."
+    },
+    {
+      "id": "public-cli-unavailable",
+      "action": "stop-no-retry",
+      "evidence_required": "Record the missing public version-pinned CLI and keep the invocation blocked."
+    }
+  ],
+  "execution_configurations": [
+    {
+      "configuration_id": "codex-eval10-real-smoke-v1",
+      "platform": "codex",
+      "harness": "codex-cli-with-eval10-adapter",
+      "client_version": "0.147.0",
+      "requested_model": "gpt-5.6-sol",
+      "resolved_model": null,
+      "model_resolution_status": "client-catalog-alias",
+      "reasoning": "low",
+      "profile": "custom",
+      "permissions_digest": "sha256:0b0eb1ac4720cbf0621a2ebbc6406ea38293e2d2722bcac66d7675128df5b4a2",
+      "toolset_digest": "sha256:b13a2946495050844b10603895fce8c5dc38b36f232a4838352273bd23e4417c",
+      "adapter_revision": "codex-eval10-v2@sha256:9b13e566995d930555a8cee8522e7ffdd77083976944bb0fd9229f08d1ae68c8",
+      "binding_state": "control-bound",
+      "blocker": null
+    }
+  ],
+  "invocations": [
+    {
+      "invocation_id": "codex-eval10-real-smoke-invocation-v1",
+      "configuration_id": "codex-eval10-real-smoke-v1",
+      "platform": "codex",
+      "plan_state": "planned",
+      "execute": true,
+      "executable": "codex",
+      "cwd": "<isolated-read-only-fixture-root>",
+      "argv": [
+        "codex",
+        "--ask-for-approval",
+        "never",
+        "--sandbox",
+        "read-only",
+        "--model",
+        "<requested-model>",
+        "--config",
+        "model_reasoning_effort=\"<reasoning-effort>\"",
+        "--config",
+        "project_doc_max_bytes=0",
+        "--config",
+        "web_search=\"disabled\"",
+        "--disable",
+        "apps",
+        "--disable",
+        "browser_use",
+        "--disable",
+        "browser_use_external",
+        "--disable",
+        "code_mode",
+        "--disable",
+        "code_mode_host",
+        "--disable",
+        "computer_use",
+        "--disable",
+        "goals",
+        "--disable",
+        "image_generation",
+        "--disable",
+        "in_app_browser",
+        "--disable",
+        "memories",
+        "--disable",
+        "multi_agent",
+        "--disable",
+        "plugin_sharing",
+        "--disable",
+        "remote_plugin",
+        "--disable",
+        "shell_tool",
+        "--disable",
+        "skill_mcp_dependency_install",
+        "--disable",
+        "skill_search",
+        "--disable",
+        "tool_suggest",
+        "--disable",
+        "unified_exec",
+        "--disable",
+        "view_image",
+        "--disable",
+        "workspace_dependencies",
+        "--strict-config",
+        "exec",
+        "--ephemeral",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--skip-git-repo-check",
+        "--cd",
+        "<isolated-read-only-fixture-root>",
+        "--color",
+        "never",
+        "--json",
+        "--output-last-message",
+        "<artifact-root>/decision-log.md",
+        "-"
+      ],
+      "input_transport": "stdin",
+      "stdin_source": "<fixture-prompt>",
+      "stdout_format": "jsonl",
+      "stderr_policy": "capture",
+      "network_policy": "codex-client-network-endpoints-unverified",
+      "file_policy": "read-only",
+      "expected_cli_invocations": 1,
+      "expected_provider_requests": null,
+      "blocker": null
+    }
+  ],
+  "claims": {
+    "quality_comparison": "not-computed",
+    "inference": "not-computed",
+    "winner": null,
+    "ranking": null,
+    "promotion_recommendation": null
+  }
+}

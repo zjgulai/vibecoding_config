@@ -24,6 +24,8 @@ Prompt Chain 的价值来自稳定的产物接口，而不是把全部阶段塞�
 | `{{TIME_OR_BUDGET}}` | 时间、token、成本或样本上限 | 缺失时提出有依据的最小范围，不伪造预算 |
 | `{{KNOWN_ARTIFACTS}}` | 已存在的 Axx 文件、PRD、Issue、设计或测试 | 先验证存在性和新鲜度 |
 | `{{HUMAN_RESPONSIBILITY}}` | `Delegate`、`Review` 或 `Own` | 未指定时由 R0–R3 与当前门建议；R3 保持 `Own` |
+| `{{AUTONOMY_MODE}}` | `interactive` 或 `bounded_async` | 默认 `interactive`；后者必须有当前任务完整 Envelope |
+| `{{AUTONOMY_ENVELOPE}}` | 当前任务范围、反馈、停止和交接的记录 | 默认 `NONE`；不是权限、Gate 或后台运行授权 |
 
 变量不是要求全部手工填写。能从工作区和已确认产物查明的事实由 Agent 自行读取；只有会实质改变产品、架构、数据、权限、UX 或成本的缺口才询问。
 
@@ -32,17 +34,37 @@ Prompt Chain 的价值来自稳定的产物接口，而不是把全部阶段塞�
 ### `MODE=PLAN`
 
 - 允许读取授权范围内的文件和公开资料。
-- 允许生成分析、计划、草稿和本地文档，前提是用户已要求产出文档。
+- 允许在回复中生成分析、计划、草稿、文件内容或拟落盘内容预览，但不写任何文件；Prompt 中的输出文件名只定义 artifact schema，不构成写入授权。
 - 不修改产品代码、依赖、tracker、云资源或生产状态。
 - 默认不 commit、push、发布或部署。
 
 ### `MODE=APPLY`
 
-- 允许在明确工作区和文件范围内完成可逆修改并运行已有验证。
+- 只有适用的 G3 决定、G4 本地写入授权、工作区与精确文件范围彼此匹配时，才允许完成可逆本地修改并运行已有验证；缺少任一项就退回 PLAN。
 - 遇到 R2 架构、数据、权限、兼容性或核心 UX 决策时先展示方案和回滚。
 - R3 外部或破坏性动作仍需对象级、当次明确的 `R3_ACTION_AUTHORIZATION`；G5/G6 的 readiness/design 决定不能替代它。
 
+### 何时使用 `bounded_async`
+
+完整字段语义以 [控制面规范](08-AI-Native-SDLC控制面规范.md) 的 `Autonomy Envelope` 为准；本手册不复制该字段表。
+
+- R1 正例：一个已获 G4 批准的本地 ticket 已明确目标文件、允许命令、最窄测试、停止条件和交接责任。Agent 可以在这些范围内连续执行实现、验证、修复和证据回传。
+- R2 停止例：任务需要选择公开 API、schema、auth、迁移或核心 UX 方案时，Agent 停在方案和作者验证材料，等待独立审证与相应 G3/G4 决定。
+- R3 停止例：发布、生产读写、外部发送、付费调用或不可逆动作只允许形成 proposal、runbook、dry-run 或获授权的只读证据；实际动作仍需要 Human `Own` 与当次 `R3_ACTION_AUTHORIZATION`。
+
+### 何时启用故事追踪与编译式交付
+
+详细方法见 [09-故事线驱动与编译式交付模式.md](09-故事线驱动与编译式交付模式.md)。这两项是既有 Chain 的条件能力，不是必走的新阶段。
+
+- 当产品决定依赖用户从现状到目标状态的转变时，在 M03–M05 启用故事追踪。故事必须写成可证伪假说，并绑定观察、可观察预测、反证、适用边界及 `SH -> FR/RISK -> AC`；叙事完整不是证据。
+- 当最大不确定性是 Agent 与工具能否解决问题时，在 M06 使用 capability spike，以最小 TUI/CLI 和 deterministic fixture 验证闭环。当最大不确定性是交互、理解、信任、可用性或视觉层级时，使用 UI prototype；TUI 通过不能替代 UX 验证。
+- Shared transform 与 target adapter 使用两道独立门：前者仅在至少两个真实目标共享同一 approved canonical semantics 时启用，并可进入目标矩阵；后者可用于多目标的目标原生差异，或单目标中不可忽略且不能由简单配置表达的平台差异。任何 adapter 进入实施前必须已有 native validator。
+- 单目标 adapter 只形成该目标的 adapter 边界与 native 证据，不自动触发 shared transform、intermediate/reference contract、parity 或目标矩阵。没有真实差异时继续使用单路径，不为未来目标预建抽象。
+- M11 必须比较预期用户转变与实际行为，统一使用 `Verified | Verified with caveats | Refuted | Unverified`；verdict 只判断 observation 是否支持预测，不证明因果。若两者冲突，保留反证和混杂因素，回到 M03 修订问题/工作流证据，或回到 M05 修订行为/验收规格。
+
 ## 4. 审批门 G0–G6
+
+本节只作操作速查。完整的模块与 Gate 规范映射以 [04-模块化Skills工作流.md](04-模块化Skills工作流.md) 为准；`Control Contract`、artifact 状态、Human responsibility、证据、回退与 R3 动作授权语义以 [08-AI-Native-SDLC控制面规范.md](08-AI-Native-SDLC控制面规范.md) 为准。
 
 | Gate | 决定 | 未通过时允许做什么 |
 |---|---|---|

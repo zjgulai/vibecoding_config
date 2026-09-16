@@ -46,13 +46,17 @@
 3. 候选经验必须有可复现 evidence、窄 scope、反例、冲突/风险和 expiry signal。秘密、PII、原始会话和一次性路径不得进入 Memory。
 4. 选择正确载体：跨项目稳定规则 -> user kernel candidate；项目事实 -> project profile/local docs；多步骤判断 -> Skill；路径/技术栈约束 -> local module；确定性阻断 -> hook/CI；测试可捕获的行为 -> test/eval。
 5. 若 memory-governance 或 writing-for-agents Audit 已安装且用户显式选择，加载它们。它们只提出 retain/rewrite/move/delete/needs-evidence，不自动晋升。
-6. Skill/Prompt evolution 使用固定循环：harvest sanitized cases -> mine recurring task -> split replay/holdout -> run baseline -> propose bounded single-variable edit -> replay -> held-out gate -> stage -> human adopt。
-7. 不在同一候选中同时修改 benchmark 和被测 Prompt/Skill。保留 no-regression cases；评估失败写 journal，不删除失败样本来制造提升。
-8. 限制 edit budget、sessions/tasks、并行 proposal 和轮次。连续两次同类失败先 park；非收敛时停止，不无限自改。
-9. SkillOpt 或其他真实 backend 可能发送脱敏会话到 provider并消费预算；必须先审查数据边界和费用。默认用 mock/dry-run 和 reviewed tasks file。
-10. 所有候选先 stage。G6 只决定采纳设计是否可进入变更提案，不授权写入。实际修改 Prompt、Skill、AGENTS/CLAUDE、project rule 或长期 Memory 必须同时满足 MODE=APPLY，以及与 target files、exact diff、风险等级、备份/回滚、验证和失效条件绑定的 `LOCAL_CHANGE_AUTHORIZATION`；R2 目标须经过 G3/G4。任一项缺失时只输出候选 diff 并停止。
-11. 若还要向 registry、远端仓库、plugin catalog 或其他外部系统 publish/adopt，必须另有 `R3_ACTION_AUTHORIZATION`，逐项包含 Target、Action、Expected effect、Credential scope（不含值）、Cost、Rollback、Verification、Idempotency/duplicate guard、Expiry。auto-adopt/auto-publish 默认禁止。
-12. 经授权采纳后仍只称在固定任务/模型/权限下通过，不推广为普遍提升。记录版本、评测、写入 receipt 和过期条件。
+6. “同类工作重复三次”只是一条发现信号，不是自动 Skill 化或采纳阈值。还必须证明任务边界稳定、输入/输出可描述、存在可复现 failure/trap，且相对普通 Prompt 有待验证的决策价值；证据不足时保留为 candidate/needs-evidence。
+7. Skill/Prompt evolution 使用固定循环：harvest sanitized cases -> mine recurring task -> split replay/holdout -> run baseline -> propose bounded single-variable edit -> replay -> held-out gate -> stage -> human adopt。
+8. Skill 候选必须交付一个可独立审计的 bundle：`adapter + trap fixture + answer/oracle + smoke A/B`。adapter 描述触发/输入/输出/权限/停止边界；trap fixture 暴露最容易误判的决策点；answer/oracle 定义可判定的期望；smoke A/B 固定任务、模型、配置与评分，并保留 raw result。缺任一项不得晋升正式 Skill。
+9. 不在同一候选中同时修改 benchmark 和被测 Prompt/Skill。保留 no-regression cases、null result、negative result 和失败 journal，不删除失败样本来制造提升。仅使用合成 fixture、少量任务或少量重复运行时，结论只能称 `smoke`，不得称 benchmark、稳定提升或普适增益。
+10. 限制 edit budget、sessions/tasks、并行 proposal 和轮次。连续两次同类失败先 park；非收敛时停止，不无限自改。
+11. SkillOpt 或其他真实 backend 可能发送脱敏会话到 provider并消费预算；必须先审查数据边界和费用。默认用 mock/dry-run 和 reviewed tasks file。
+12. 所有候选先 stage。G6 只决定采纳设计是否可进入变更提案，不授权写入。实际修改 Prompt、Skill、AGENTS/CLAUDE、project rule 或长期 Memory 必须同时满足 MODE=APPLY，以及与 target files、exact diff、风险等级、备份/回滚、验证和失效条件绑定的 `LOCAL_CHANGE_AUTHORIZATION`；R2 目标须经过 G3/G4。任一项缺失时只输出候选 diff 并停止。
+13. 若还要向 registry、远端仓库、plugin catalog 或其他外部系统 publish/adopt，必须另有 `R3_ACTION_AUTHORIZATION`，逐项包含 Target、Action、Expected effect、Credential scope（不含值）、Cost、Rollback、Verification、Idempotency/duplicate guard、Expiry。auto-adopt/auto-publish 默认禁止。
+14. 经授权采纳后仍只称在固定任务/模型/权限下通过，不推广为普遍提升。记录版本、评测、写入 receipt 和过期条件。
+
+每次配置失败先分类为事实、候选规则、工具缺口、项目事实缺口或评测缺口。只有同类问题具备可复验证据、窄适用范围且 holdout 不退化时，才可提出单变量候选；否则保留为证据缺口或 park，不写成永久规则。
 
 输出 `A13-retrospective.md`：
 
@@ -75,7 +79,15 @@
 ## Candidate learnings
 | ID | Observation | Evidence | Scope | Counterexample | Destination | Expiry |
 
+## Candidate classification
+事实 | 候选规则 | 工具缺口 | 项目事实缺口 | 评测缺口；每项写依据、下一补证据动作或 park 原因。
+
 ## Proposed evolution target
+## Skill candidate bundle
+- Adapter: trigger、inputs/outputs、decision points、authority、stop conditions。
+- Trap fixture: 最容易误判的情境与输入。
+- Answer/oracle: 可判定的期望与失败条件。
+- Smoke A/B: 固定任务、模型、配置、评分、原始结果和运行次数；合成/少量运行必须标为 `smoke`。
 ## Baseline and held-out evaluation plan
 ## Bounded proposed edit
 以 diff/明确变更描述呈现，不直接应用。
@@ -96,5 +108,5 @@ G6 design decision：Stage | Reject | Needs evidence | Approved design。`Approv
 ## Handoff
 回到 M02/M03/M04/M08/M12，或不行动。
 
-完成标准：学习有证据和边界；benchmark 与被测对象没有共同漂移；G6 design 与实际写入授权分离；候选未自动晋升；失败记录被保留；任何提升表述限定于实际评测范围。
+完成标准：学习有证据和边界；“重复三次”未被当作晋升阈值；Skill 候选 bundle 完整；benchmark 与被测对象没有共同漂移；G6 design 与实际写入授权分离；候选未自动晋升；null/negative/失败记录被保留；任何提升表述限定于实际评测范围，合成或少量运行只称 smoke。
 ```

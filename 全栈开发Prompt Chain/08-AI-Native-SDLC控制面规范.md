@@ -24,6 +24,7 @@
 | **独立验证** | 与实现上下文分离的审证；可由另一 Agent、另一会话、CI 或人完成，但必须记录方法和局限。 |
 | **能力资产（Capability Asset）** | 已验证、可复验、带适用边界的示例、fixture、命令、原型或决策模式。它不是未经核验的代码片段或网页收藏。 |
 | **认知债** | Agent 产生的复杂度或关键行为已超过团队可解释、可预测、可安全修改的程度。 |
+| **有界自主信封（Autonomy Envelope）** | 仅在当前任务明确选择 `bounded_async` 时填入的可选 Control Contract 字段组。它限定工作范围、反馈、停止和交接，不是新 artifact、Gate、Skill、权限或运行时调度器。 |
 
 ## 3. 控制契约
 
@@ -49,6 +50,28 @@
 - Recovery and route: <回滚/恢复前提、失效条件、唯一下一安全动作>
 ```
 
+#### 可选的 Autonomy Envelope
+
+默认模式为 `interactive`。只有当前任务的范围、风险、工具、数据和验收均已明确，且使用者明确选择时，才可使用 `bounded_async`。完整字段只在本规范中定义：
+
+```markdown
+## Autonomy Envelope
+- Mode: interactive | bounded_async
+- Risk and human responsibility: R0–R3 / Delegate | Review | Own
+- Objective and Definition of Done: <当前可观察目标与验收>
+- Write scope: <允许修改的路径；R0 写 Not applicable>
+- Tool and data scope: <允许的本地命令、浏览器或 MCP；禁止项与数据边界>
+- Required feedback loop: <最窄测试、type/lint、build、mock、browser 或其他实际可运行检查>
+- Stop conditions: <范围、权限、失败、证据、依赖或风险升级>
+- Budget and checkpoint: <任务级时间/重试/成本依据；非固定全局阈值>
+- Enforcement evidence: Not available | Declared only | Verified by <sandbox/hook/CI/command evidence>
+- Handoff: <主责任人、artifact、原始证据、未验证范围、唯一下一安全动作>
+```
+
+- `interactive` 可省略该节或写 `Not applicable`；不能因省略而推断获准连续执行。
+- Envelope 只绑定当前任务，不能跨 Axx 自动继承。目标、范围、风险、环境、工具或证据变化时，必须重新核验。
+- `Enforcement evidence: Declared only` 只表示文档声明，不能说明 sandbox、Hook、CI、MCP 或权限在运行时有效。
+
 ### 3.2 状态语义
 
 | 状态 | 可表达的事实 | 不可表达的含义 |
@@ -67,6 +90,17 @@
 | `Delegate` | R0/R1、局部可逆且验收清晰的工作 | 在获准范围内实现、验证、形成证据。 | 审阅异常、范围变更或结果采纳。 |
 | `Review` | R2、关键设计、公共接口、AI 行为、权限或数据边界变更 | 提出方案、运行作者验证、准备独立审证材料。 | 审查取舍、残余风险和是否进入下一门。 |
 | `Own` | R3、生产、外部动作、不可逆数据/权限/商业决定 | 只形成 proposal、runbook、dry-run 或只读证据。 | 批准具体行动，承担发布/事故/业务判断。 |
+
+### 3.4 有界执行与停止
+
+`bounded_async` 只描述任务内的连续本地工作，不改变责任级别、Gate 或对象级授权。
+
+| 风险 | `bounded_async` 可以做什么 | 必须停止的位置 |
+|---|---|---|
+| R0 | 批量阅读、检索、dry-run、分析与只读验证。 | 数据边界、来源或任务范围不清。 |
+| R1 | 在明确 `write_scope` 内执行实现、验证、修复和证据回传。 | 需要新依赖、超出范围、架构/权限/数据影响扩大，或验证不收敛。 |
+| R2 | `bounded_async` 不适用。可在 `interactive` 下准备方案、作者验证、审证材料和有明确 G3/G4 的局部工作。 | 任何高影响决定、范围变化、独立审证缺失或实现者试图自我放行。 |
+| R3 | `bounded_async` 不适用。只可在 `interactive` 下形成 proposal、runbook、dry-run 或获授权的只读证据。 | 任何真实外部、生产、不可逆或商业动作之前；仍需 Human `Own` 和当次对象级授权。 |
 
 ## 4. 产物链与回退语义
 
@@ -95,6 +129,37 @@
 - 发布、运行或实验事实改变：先经 M11/M12，再回到相应上游模块。
 
 任何回退都保留旧 artifact 为 `superseded`，并写出触发证据；不得在下游静默修补上游假设。
+
+### 4.1 可替换实现与持久行为契约
+
+「代码可丢弃」只适用于可替换实现、原型和缺少独特行为证据的实现细节。A05、A07 与 A08 必须共同区分可替换实现、不可替换行为、保留测试/验证，以及兼容和恢复约束：
+
+- A05 定义用户可观察行为、非目标、不变量和风险验收。
+- A07 定义架构、API、schema、auth、migration、observability 和 rollback 的持久边界，以及验证可达性。
+- A08 可以替换实现，但不能静默弱化 A05/A07 的契约。
+- A09 记录独立验证、未验证范围和残余风险。
+
+E2E、integration、property 和 load 测试只有在提供独特行为或风险证据时必须保留；不得按测试类别机械保留或删除。消融时，只有具备当前 requirement、invariant、failure mode 或 risk trace 的 seam、test 或 guardrail 可以 `retain`；其余必须成为 `remove` 或 `defer` 候选。
+
+### 4.2 故事假设与条件式多目标投影
+
+用户故事或产品故事线是待验证假设，不是新 artifact 或事实来源。它在既有产物链中的唯一投影是：
+
+```text
+A03 观察与可证伪故事假设
+→ A04 已批准的价值转变与范围
+→ A05 canonical product contract
+→ A07 shared rules + conditional target adapters
+→ A08 target-native implementation
+→ A09 reference contract + native verification
+→ A10/A11 获授权发布与实际观察
+```
+
+- 只有同一 A05 需要产生两个以上真实目标表示，或已有可测量的跨目标语义漂移时，A07 才引入 shared transform、跨目标契约与目标矩阵。单一目标只有在存在不可忽略、不能由简单配置表达的平台/协议/provider 差异时，才可引入一个窄 target adapter，并且必须先有该目标的 native validator；这不自动触发 shared transform、中间表示或跨目标矩阵。其他单目标应用继续使用垂直 slice。
+- A05 是共享行为语义，不是某个目标的施工清单；A07 只把共同规则实现一次，并隔离 Web、API、数据、模型 provider 或部署目标的真实差异。
+- A09 先验证 reference contract，再运行受影响目标的原生检查。不得为让单一目标通过而削弱已批准的共同契约。
+- 生产观察与故事假设冲突时，按第 4 节回退 M03/M05；不得润色故事或在下游静默改变规格。
+- 完整方法、启用条件与来源边界见 [`09-故事线驱动与编译式交付模式.md`](09-故事线驱动与编译式交付模式.md)。
 
 ## 5. 验证与生产门
 
@@ -140,11 +205,15 @@ Skill 采用 `candidate → trial → approved → retired` 生命周期。每�
 - 验收项的证据完整度、未验证范围和人类 Review 负荷；
 - 被接受变更的成本、时延与 AI 质量护栏；
 - 能力资产/Skill 的试用成功率、过期率和退休原因。
+- 人类介入的原因；
+- 范围或权限停止的次数；
+- 作者验证与独立验证之间的缺口；
+- 返工、回退和审查发现。
 
-不预设跨项目目标值。先建立基线，再一次只变更一个控制面变量；只有静态文档控制经真实任务证明不足时，才讨论动态上下文、任务台账或自动证据收集等运行时编排。
+不预设跨项目目标值，也不以 Agent 时长、代码行数或固定 coverage 作为采纳条件。先建立基线，再一次只变更一个控制面变量；只有静态文档控制经真实任务证明不足时，才讨论动态上下文、任务台账或自动证据收集等运行时编排。
 
 ## 9. 维护规则
 
-- 本规范是控制面语义的单一真相源；04、06、M00、99 与平台 Adapter 只引用或应用其内容，不复制第二份定义。
+- 本规范是 Control Contract、状态、人类责任、证据、回退与 R3 授权语义的单一真相源；`04-模块化Skills工作流.md` 是 M00–M13、A00–A13 与 G0–G6 模块/Gate 问题的规范映射，`06-Prompt-Chain使用手册.md` 只提供操作速查。09、M00、99 与平台 Adapter 只能引用或应用这两类既有语义，不再定义平行状态机、Gate 或授权规则。
 - 平台、模型、Skill、Hook、MCP 或外部研究资料变更时，先更新来源账本和适用性判断，再更新规则。
 - 任何实际写入用户级规则、项目规则、Memory 或 Skill 的晋升，仍须经过现有授权、备份/回滚和验证流程。

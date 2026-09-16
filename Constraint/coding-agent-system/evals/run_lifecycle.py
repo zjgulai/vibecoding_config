@@ -6,10 +6,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import signal
 import subprocess
 import time
 from pathlib import Path
-from typing import Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from eval_protocol import (
     artifact_tree_digest_v2,
@@ -23,6 +24,7 @@ from receipt import (
     CONTROL_SOURCE_SCOPE,
     INTEGRITY_SCOPE,
     RECEIPT_REVISION,
+    RECEIPT_SCHEMA_VERSION,
     validate_control_declaration,
     validate_receipt,
 )
@@ -56,7 +58,7 @@ def _run_step(
     name: str,
     argv: List[str],
     expected_exit_code: int,
-    timeout_seconds: int,
+    timeout_seconds: float,
     cwd: Path,
     artifact_root: Path,
     environment: Mapping[str, str],
@@ -67,23 +69,32 @@ def _run_step(
     stderr_path = log_root / "{}.stderr".format(name)
     timed_out = False
     exit_code: Optional[int]
+    process = subprocess.Popen(
+        argv,
+        cwd=str(cwd),
+        env=dict(environment),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        start_new_session=os.name == "posix",
+    )
     try:
-        completed = subprocess.run(
-            argv,
-            cwd=str(cwd),
-            env=dict(environment),
-            capture_output=True,
-            check=False,
-            timeout=timeout_seconds,
-        )
-        exit_code = completed.returncode
-        stdout = completed.stdout
-        stderr = completed.stderr
-    except subprocess.TimeoutExpired as error:
+        stdout, stderr = process.communicate(timeout=timeout_seconds)
+        exit_code = process.returncode
+    except subprocess.TimeoutExpired:
         timed_out = True
         exit_code = None
-        stdout = error.stdout or b""
-        stderr = error.stderr or b""
+        if os.name == "posix":
+            try:
+                # The lifecycle deadline is a hard boundary. Kill the complete
+                # current process group immediately instead of granting extra
+                # post-deadline execution time to an agent/client.
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            stdout, stderr = process.communicate()
+        else:
+            process.kill()
+            stdout, stderr = process.communicate()
     stdout_path.write_bytes(stdout)
     stderr_path.write_bytes(stderr)
     return {
@@ -109,7 +120,6 @@ def _minimal_environment() -> Dict[str, str]:
     """Forward only process-launch essentials, never arbitrary parent variables."""
 
     allowed = (
-        "PATH",
         "LANG",
         "LC_ALL",
         "LC_CTYPE",
@@ -121,11 +131,27 @@ def _minimal_environment() -> Dict[str, str]:
         "COMSPEC",
         "PATHEXT",
     )
-    return {name: os.environ[name] for name in allowed if name in os.environ}
+    environment = {
+        name: os.environ[name] for name in allowed if name in os.environ
+    }
+    environment["PATH"] = os.defpath
+    return environment
 
 
 def _canonical_receipt_bytes(receipt: Mapping) -> bytes:
     return (json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+
+
+def _refresh_step_output_references(steps: Mapping[str, Dict], artifact_root: Path) -> None:
+    """Rebind stream digests after a pre-receipt guard redacts an artifact."""
+
+    for step in steps.values():
+        if not step["executed"]:
+            continue
+        for stream in ("stdout", "stderr"):
+            reference = step[stream]
+            path = artifact_root / reference["path"]
+            step[stream] = _output_reference(path, artifact_root)
 
 
 def run_lifecycle(
@@ -138,17 +164,27 @@ def run_lifecycle(
     agent_argv: List[str],
     agent_timeout_seconds: int,
     control_declaration: Mapping,
+    pre_receipt_artifact_guard: Optional[Callable[[Path], bool]] = None,
+    lifecycle_timeout_seconds: Optional[float] = None,
 ) -> Tuple[Dict, bool]:
+    if lifecycle_timeout_seconds is not None:
+        if (
+            isinstance(lifecycle_timeout_seconds, bool)
+            or not isinstance(lifecycle_timeout_seconds, (int, float))
+            or lifecycle_timeout_seconds <= 0
+        ):
+            raise ValueError("lifecycle_timeout_seconds must be positive or null")
     validate_control_declaration(control_declaration)
     manifest = load_json(manifest_path)
     validate_manifest_structure(manifest)
     fixture = find_fixture(manifest, task_id)
     if fixture["readiness"] != "ready":
         raise ValueError("fixture {!r} is contract-only and cannot run".format(fixture["fixture_id"]))
-    if not configuration_root.is_dir() or configuration_root.is_symlink():
+    resolved_configuration_root = configuration_root.resolve()
+    if not resolved_configuration_root.is_dir() or configuration_root.is_symlink():
         raise ValueError("configuration root must be a regular directory")
     manifest_digest = sha256_file(manifest_path)
-    configuration_digest = tree_digest_v2(configuration_root)
+    configuration_digest = tree_digest_v2(resolved_configuration_root)
     if output_dir.exists() and (not output_dir.is_dir() or any(output_dir.iterdir())):
         raise ValueError("output directory must not exist or must be empty")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -162,6 +198,7 @@ def run_lifecycle(
     environment.update(
         {
             "EVAL_ARTIFACT_ROOT": str(artifact_root.resolve()),
+            "EVAL_CONFIGURATION_ROOT": str(resolved_configuration_root),
             "EVAL_TASK_ID": task_id,
             "EVAL_CONFIGURATION_REVISION": configuration_revision,
             "EVAL_REPETITION_INDEX": str(repetition_index),
@@ -182,49 +219,78 @@ def run_lifecycle(
     pre_run_digest: Optional[str] = None
     agent_duration_seconds: Optional[float] = None
     artifact_contract_valid = False
+    artifact_guard_passed = True
 
-    steps["reset"] = _run_step(
-        "reset",
-        reset_argv,
-        fixture["reset"]["expected_exit_code"],
-        fixture["reset"]["timeout_seconds"],
-        root,
-        artifact_root,
-        environment,
+    lifecycle_started = time.monotonic()
+    lifecycle_deadline = (
+        None
+        if lifecycle_timeout_seconds is None
+        else lifecycle_started + float(lifecycle_timeout_seconds)
     )
-    if _step_succeeded(steps["reset"]):
-        steps["setup"] = _run_step(
-            "setup",
-            setup_argv,
-            fixture["setup"]["expected_exit_code"],
-            fixture["setup"]["timeout_seconds"],
+
+    def remaining_timeout(requested: int) -> Optional[float]:
+        if lifecycle_deadline is None:
+            return float(requested)
+        remaining = lifecycle_deadline - time.monotonic()
+        if remaining <= 0:
+            return None
+        return min(float(requested), remaining)
+
+    reset_timeout = remaining_timeout(fixture["reset"]["timeout_seconds"])
+    if reset_timeout is not None:
+        steps["reset"] = _run_step(
+            "reset",
+            reset_argv,
+            fixture["reset"]["expected_exit_code"],
+            reset_timeout,
             root,
             artifact_root,
             environment,
         )
+    if _step_succeeded(steps["reset"]):
+        setup_timeout = remaining_timeout(fixture["setup"]["timeout_seconds"])
+        if setup_timeout is not None:
+            steps["setup"] = _run_step(
+                "setup",
+                setup_argv,
+                fixture["setup"]["expected_exit_code"],
+                setup_timeout,
+                root,
+                artifact_root,
+                environment,
+            )
     if _step_succeeded(steps["setup"]):
         pre_run_digest = tree_digest_v2(root)
     if pre_run_digest == fixture["initial_state_digest"]:
-        agent_started = time.monotonic()
-        steps["agent"] = _run_step(
-            "agent",
-            agent_argv,
-            0,
-            agent_timeout_seconds,
-            root,
-            artifact_root,
-            environment,
-        )
-        agent_duration_seconds = round(time.monotonic() - agent_started, 6)
-        steps["oracle"] = _run_step(
-            "oracle",
-            oracle_argv,
-            fixture["oracle"]["expected_exit_code"],
-            fixture["oracle"]["timeout_seconds"],
-            root,
-            artifact_root,
-            environment,
-        )
+        agent_timeout = remaining_timeout(agent_timeout_seconds)
+        if agent_timeout is not None:
+            agent_started = time.monotonic()
+            steps["agent"] = _run_step(
+                "agent",
+                agent_argv,
+                0,
+                agent_timeout,
+                root,
+                artifact_root,
+                environment,
+            )
+            agent_duration_seconds = round(time.monotonic() - agent_started, 6)
+        oracle_timeout = remaining_timeout(fixture["oracle"]["timeout_seconds"])
+        if oracle_timeout is not None:
+            steps["oracle"] = _run_step(
+                "oracle",
+                oracle_argv,
+                fixture["oracle"]["expected_exit_code"],
+                oracle_timeout,
+                root,
+                artifact_root,
+                environment,
+            )
+        if pre_receipt_artifact_guard is not None:
+            artifact_guard_passed = pre_receipt_artifact_guard(artifact_root)
+            if not isinstance(artifact_guard_passed, bool):
+                raise ValueError("pre-receipt artifact guard must return a boolean")
+            _refresh_step_output_references(steps, artifact_root)
         artifact_errors = verify_artifact_contract(fixture["artifacts"], artifact_root)
         artifact_contract_valid = not artifact_errors
         if artifact_errors:
@@ -237,10 +303,17 @@ def run_lifecycle(
         if _step_succeeded(steps["oracle"]) and artifact_contract_valid
         else "fail" if steps["oracle"]["executed"] else "not-run"
     )
+    lifecycle_elapsed = time.monotonic() - lifecycle_started
+    lifecycle_timed_out = (
+        lifecycle_timeout_seconds is not None
+        and lifecycle_elapsed >= float(lifecycle_timeout_seconds)
+    )
+    lifecycle_duration_seconds = round(lifecycle_elapsed, 6)
     receipt = {
-        "schema_version": "2",
+        "schema_version": RECEIPT_SCHEMA_VERSION,
         "runner_revision": RECEIPT_REVISION,
         "integrity_scope": INTEGRITY_SCOPE,
+        "evidence_scope": manifest["evidence_scope"],
         "manifest_revision": manifest["manifest_revision"],
         "manifest_digest": manifest_digest,
         "task_id": fixture["task_id"],
@@ -252,6 +325,9 @@ def run_lifecycle(
         "configuration_revision": configuration_revision,
         "configuration_digest": configuration_digest,
         "repetition_index": repetition_index,
+        "lifecycle_duration_seconds": lifecycle_duration_seconds,
+        "lifecycle_timeout_seconds": lifecycle_timeout_seconds,
+        "lifecycle_timed_out": lifecycle_timed_out,
         "control_snapshot": {
             "snapshot_revision": CONTROL_SNAPSHOT_REVISION,
             "source_scope": CONTROL_SOURCE_SCOPE,
@@ -283,6 +359,7 @@ def run_lifecycle(
         pre_run_digest == fixture["initial_state_digest"]
         and _step_succeeded(steps["agent"])
         and oracle_outcome == "pass"
+        and artifact_guard_passed
     )
     return receipt, success
 

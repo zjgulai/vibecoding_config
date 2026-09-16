@@ -16,6 +16,8 @@
 {{DATA_BOUNDARY}}
 {{KNOWN_ARTIFACTS}}
 {{HUMAN_RESPONSIBILITY}} = AUTO | Delegate | Review | Own；默认 AUTO
+{{AUTONOMY_MODE}} = interactive | bounded_async；默认 interactive
+{{AUTONOMY_ENVELOPE}} = NONE 或当前任务的完整 Envelope
 ```
 
 ## 可复制控制 Prompt
@@ -33,6 +35,8 @@
 - DATA_BOUNDARY: {{DATA_BOUNDARY}}
 - KNOWN_ARTIFACTS: {{KNOWN_ARTIFACTS}}
 - HUMAN_RESPONSIBILITY: {{HUMAN_RESPONSIBILITY}}
+- AUTONOMY_MODE: {{AUTONOMY_MODE}}
+- AUTONOMY_ENVELOPE: {{AUTONOMY_ENVELOPE}}
 
 全局纪律：
 1. 先执行或恢复 M00，读取适用指令、工作区事实和已有 A00–A13。已有产物只有在状态、新鲜度、输入和当前工作区一致时才能复用。
@@ -49,6 +53,12 @@
 12. 最终完成声明只引用新鲜验证；static/dry-run/fixture/local smoke/external read/real side effect 不得混淆。R2/R3 不得由实现者成为唯一验证或放行者。
 13. 用户可见 UI 变更必须将适用的 A05/A06 视觉约束传递到 M07/M08，并在 M08/M09 记录真实同屏渲染证据；无证据只能标记未验证，不得声明视觉完成。
 14. 消融路由：M06/M07 在设计产物形成后执行设计删减检查；M08 在首次可信 green 后只对当前 diff 逐项复验；M09 只读独立审证；全程不得扩大 Gate、ALLOWED_FILES、DEPENDENCY_CHANGES、外部动作或生产权限。
+
+有界连续执行规则：
+1. `AUTONOMY_MODE` 默认为 `interactive`。执行 `bounded_async` 前，逐项将 Envelope 与 R0–R3、G3/G4、`ALLOWED_FILES`、`EXTERNAL_EFFECTS` 和数据边界比对。
+2. 只有 R0/R1 可在明确 scope 内连续运行本地反馈循环。R2/R3 遇到决策、审证或行动边界立即停止；运行时间不能改变风险等级或人类责任。
+3. 每轮只回传原始命令/结果、变更范围、失败原因、未验证项和唯一下一安全动作；不得用「Agent 已持续运行」代替验证。
+4. 并行只允许既有单一责任链定义的独立只读或隔离切片。Envelope 不授权共享状态并行写入、Agent 再委派或任何外部动作。
 
 模块注册表：
 - M00 -> A00-context-pack.md：目标、范围、风险、路线。
@@ -83,6 +93,7 @@
 - Input artifacts:
 - Approved gates:
 - Mode/authorization:
+- Autonomy mode/envelope status:
 - Control Contract status:
 - Evidence level:
 - Verifier and unverified scope:
@@ -99,6 +110,7 @@
 ## Controller acceptance
 - Exactly one module was executed in this turn.
 - Required input artifacts, gate state, authorization scope and Control Contract freshness were checked before execution.
+- `bounded_async` used only a complete, task-specific Envelope and stopped at its declared boundary; otherwise it was recorded as `interactive` or `Not used`.
 - R2/R3 has the required separation of author verification, independent verification and human responsibility.
 - No R3 action was executed or implied without a matching, unexpired `R3_ACTION_AUTHORIZATION`.
 - The response names one next safe action only; at a gate it is a stop or an explicit approval request.

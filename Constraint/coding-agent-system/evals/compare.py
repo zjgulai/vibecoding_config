@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 import score
-from eval_protocol import load_json
+from eval_protocol import load_json, sha256_bytes
 from receipt import INTEGRITY_SCOPE
 
 
@@ -23,6 +23,7 @@ CONTROL_FIELDS = (
     "initial_state_digest",
     "manifest_revision",
     "manifest_digest",
+    "evidence_scope",
     "agent",
     "agent_version",
     "model",
@@ -81,22 +82,16 @@ def _assert_assessor_controls_match(results: Sequence[Mapping]) -> Dict:
     return dict(reference)
 
 
-def compare_bound_records(entries: Sequence[BoundEntry]) -> Dict:
+def _group_paired_entries(
+    entries: Sequence[BoundEntry],
+) -> Tuple[
+    List[str],
+    Dict[str, List[BoundEntry]],
+    Dict[str, Dict[int, BoundEntry]],
+    Dict[str, str],
+]:
     if not entries:
         raise ValueError("at least two bound run records are required")
-    if any(not entry[4]["assessment_bound"] for entry in entries):
-        raise ValueError(
-            "quality comparison requires an assessor-bound assessment for every record"
-        )
-    if any(not entry[4]["control_bound"] for entry in entries):
-        raise ValueError(
-            "quality comparison requires receipt-bound controls for every record"
-        )
-    records = [entry[0] for entry in entries]
-    control = _assert_controls_match(records)
-    control["assessor_control"] = _assert_assessor_controls_match(
-        [entry[4] for entry in entries]
-    )
     grouped: Dict[str, List[BoundEntry]] = defaultdict(list)
     for entry in entries:
         grouped[entry[0]["configuration_revision"]].append(entry)
@@ -133,6 +128,39 @@ def compare_bound_records(entries: Sequence[BoundEntry]) -> Dict:
                 sorted(first_indices), sorted(second_indices)
             )
         )
+    return revisions, grouped, repetition_maps, configuration_digests
+
+
+def _assert_identical_agent_argv(entries: Sequence[BoundEntry]) -> List[str]:
+    values = [load_json(receipt_path)["agent_argv"] for _, _, receipt_path, _, _ in entries]
+    if any(value != values[0] for value in values[1:]):
+        raise ValueError("control variable drift for agent_argv")
+    return list(values[0])
+
+
+def _agent_argv_digest(agent_argv: Sequence[str]) -> str:
+    payload = json.dumps(list(agent_argv), ensure_ascii=False, separators=(",", ":"))
+    return sha256_bytes(payload.encode("utf-8"))
+
+
+def compare_representative_records(entries: Sequence[BoundEntry]) -> Dict:
+    if any(not entry[4]["assessment_bound"] for entry in entries):
+        raise ValueError(
+            "quality comparison requires an assessor-bound assessment for every record"
+        )
+    if any(not entry[4]["control_bound"] for entry in entries):
+        raise ValueError(
+            "quality comparison requires receipt-bound controls for every record"
+        )
+    records = [entry[0] for entry in entries]
+    control = _assert_controls_match(records)
+    control["assessor_control"] = _assert_assessor_controls_match(
+        [entry[4] for entry in entries]
+    )
+    revisions, grouped, repetition_maps, configuration_digests = _group_paired_entries(
+        entries
+    )
+    first_indices = set(repetition_maps[revisions[0]])
 
     groups = []
     for revision in revisions:
@@ -194,7 +222,9 @@ def compare_bound_records(entries: Sequence[BoundEntry]) -> Dict:
         )
 
     return {
+        "evidence_scope": "representative",
         "statistics_scope": "descriptive_paired_only",
+        "quality_comparison": "assessor-bound",
         "inference": "not_computed",
         "integrity_scope": INTEGRITY_SCOPE,
         "control": control,
@@ -203,6 +233,98 @@ def compare_bound_records(entries: Sequence[BoundEntry]) -> Dict:
         "paired": paired,
         "paired_delta": _describe(deltas),
     }
+
+
+def compare_synthetic_harness_records(entries: Sequence[BoundEntry]) -> Dict:
+    if any(not entry[4]["control_bound"] for entry in entries):
+        raise ValueError(
+            "synthetic-harness-only comparison requires receipt-bound controls"
+        )
+    if any(entry[4]["assessment_bound"] for entry in entries):
+        raise ValueError(
+            "synthetic-harness-only comparison requires declared assessment binding"
+        )
+    if any(entry[4]["scope_result"] != "synthetic-harness-only" for entry in entries):
+        raise ValueError("synthetic-harness-only score result is required")
+    if any(entry[0]["run_status"] != "completed" for entry in entries):
+        raise ValueError("synthetic-harness-only comparison requires completed runs")
+    if any(
+        entry[4]["quality_score"] is not None
+        or entry[4]["final_score"] is not None
+        or entry[4]["promotion_eligible"]
+        for entry in entries
+    ):
+        raise ValueError("synthetic-harness-only comparison cannot contain quality results")
+
+    records = [entry[0] for entry in entries]
+    control = _assert_controls_match(records)
+    agent_argv = _assert_identical_agent_argv(entries)
+    agent_argv_digest = _agent_argv_digest(agent_argv)
+    revisions, grouped, repetition_maps, configuration_digests = _group_paired_entries(
+        entries
+    )
+    first_indices = set(repetition_maps[revisions[0]])
+
+    groups = []
+    for revision in revisions:
+        runs = grouped[revision]
+        receipt_values = [load_json(receipt_path) for _, _, receipt_path, _, _ in runs]
+        groups.append(
+            {
+                "configuration_revision": revision,
+                "configuration_digest": configuration_digests[revision],
+                "n": len(runs),
+                "run_status_counts": dict(
+                    sorted(Counter(record["run_status"] for record, _, _, _, _ in runs).items())
+                ),
+                "all_lifecycle_completed": all(
+                    record["run_status"] == "completed" for record, _, _, _, _ in runs
+                ),
+                "artifact_contract_valid": all(
+                    receipt_value["artifact_contract_valid"]
+                    for receipt_value in receipt_values
+                ),
+                "agent_argv_digest": agent_argv_digest,
+            }
+        )
+
+    paired = []
+    for repetition in sorted(first_indices):
+        first = repetition_maps[revisions[0]][repetition]
+        second = repetition_maps[revisions[1]][repetition]
+        paired.append(
+            {
+                "repetition_index": repetition,
+                "configuration_a_status": first[0]["run_status"],
+                "configuration_b_status": second[0]["run_status"],
+            }
+        )
+
+    return {
+        "evidence_scope": "synthetic-harness-only",
+        "statistics_scope": "synthetic_harness_only",
+        "quality_comparison": "not-applicable",
+        "inference": "not_computed",
+        "integrity_scope": INTEGRITY_SCOPE,
+        "control": control,
+        "configuration_order": {"a": revisions[0], "b": revisions[1]},
+        "groups": groups,
+        "paired": paired,
+    }
+
+
+def compare_bound_records(entries: Sequence[BoundEntry]) -> Dict:
+    if not entries:
+        raise ValueError("at least two bound run records are required")
+    scopes = {entry[0]["evidence_scope"] for entry in entries}
+    if len(scopes) != 1:
+        raise ValueError("evidence_scope drift across comparison records")
+    evidence_scope = next(iter(scopes))
+    if evidence_scope == "synthetic-harness-only":
+        return compare_synthetic_harness_records(entries)
+    if evidence_scope == "representative":
+        return compare_representative_records(entries)
+    raise ValueError("unsupported evidence_scope for comparison")
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:

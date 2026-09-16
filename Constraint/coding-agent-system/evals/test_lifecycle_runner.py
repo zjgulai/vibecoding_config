@@ -5,11 +5,13 @@ import sys
 import json
 import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
 import validate_fixture
 import receipt
+import run_lifecycle
 from test_fixture_manifest import make_manifest
 
 
@@ -17,6 +19,15 @@ EVALS_DIR = Path(__file__).resolve().parent
 
 
 class LifecycleRunnerTests(unittest.TestCase):
+    def _wait_until_process_is_gone(self, pid: int) -> bool:
+        for _ in range(40):
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                return True
+            time.sleep(0.05)
+        return False
+
     def test_runner_requires_explicit_agent_argv(self) -> None:
         completed = subprocess.run(
             [sys.executable, str(EVALS_DIR / "run_lifecycle.py"), "--help"],
@@ -147,6 +158,9 @@ class LifecycleRunnerTests(unittest.TestCase):
                 "Path({!r}).open('a', encoding='utf-8').write('agent\\n')\n"
                 "root = Path(os.environ['EVAL_ARTIFACT_ROOT'])\n"
                 "Path(root, 'agent.txt').write_text('done\\n')\n"
+                "Path(root, 'configuration-root.txt').write_text(\n"
+                "    os.environ['EVAL_CONFIGURATION_ROOT'], encoding='utf-8'\n"
+                ")\n"
                 "Path(root, 'parent-env.txt').write_text(str(os.environ.get('EVAL_PARENT_SECRET_TEST')))\n".format(
                     str(order_log)
                 ),
@@ -204,6 +218,7 @@ class LifecycleRunnerTests(unittest.TestCase):
             self.assertEqual(receipt["pre_run_digest"], fixture["initial_state_digest"])
             self.assertEqual(receipt["oracle_outcome"], "pass")
             self.assertEqual(receipt["artifact_root"], "artifacts")
+            self.assertEqual(receipt["evidence_scope"], "representative")
             self.assertIn("control_snapshot", receipt)
             snapshot = receipt["control_snapshot"]
             self.assertEqual(snapshot["agent"], "codex")
@@ -226,9 +241,151 @@ class LifecycleRunnerTests(unittest.TestCase):
             )
             self.assertTrue((output_dir / "artifacts" / "oracle.json").is_file())
             self.assertEqual(
+                (output_dir / "artifacts/configuration-root.txt").read_text(encoding="utf-8"),
+                str(configuration_root.resolve()),
+            )
+            self.assertEqual(
                 (output_dir / "artifacts/parent-env.txt").read_text(encoding="utf-8"),
                 "None",
             )
+
+    def test_lifecycle_deadline_stops_downstream_steps(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            manifest = make_manifest(readiness="ready")
+            for index, fixture in enumerate(manifest["fixtures"], start=1):
+                root = base / "fixture-{}".format(index)
+                root.mkdir()
+                control = root / "fixture-control"
+                control.write_text(
+                    "#!/bin/sh\n"
+                    "set -eu\n"
+                    "if [ \"$1\" = reset ]; then sleep 2; fi\n"
+                    "if [ \"$1\" = oracle ]; then\n"
+                    "  printf '{\"passed\":true}\\n' > \"$3/oracle.json\"\n"
+                    "fi\n",
+                    encoding="utf-8",
+                )
+                control.chmod(0o755)
+                fixture["root"] = root.name
+                fixture["initial_state_digest"] = validate_fixture.tree_digest(root)
+
+            manifest_path = base / "manifest.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            configuration_root = base / "configuration"
+            configuration_root.mkdir()
+            agent_marker = base / "agent-ran"
+            output_dir = base / "run"
+
+            started = time.monotonic()
+            lifecycle_receipt, success = run_lifecycle.run_lifecycle(
+                manifest_path=manifest_path,
+                task_id="03-systematic-debugging",
+                configuration_revision="deadline-test",
+                configuration_root=configuration_root,
+                repetition_index=1,
+                output_dir=output_dir,
+                agent_argv=[
+                    sys.executable,
+                    "-c",
+                    "from pathlib import Path; Path({!r}).write_text('ran')".format(
+                        str(agent_marker)
+                    ),
+                ],
+                agent_timeout_seconds=30,
+                control_declaration={
+                    "agent": "codex",
+                    "agent_version": "local-test-agent-v1",
+                    "model": "local-no-model-command",
+                    "reasoning_effort": "not-applicable",
+                    "profile": "custom",
+                    "permissions_digest": "sha256:" + ("b" * 64),
+                    "toolset_digest": "sha256:" + ("c" * 64),
+                },
+                lifecycle_timeout_seconds=0.1,
+            )
+            elapsed = time.monotonic() - started
+
+            self.assertFalse(success)
+            self.assertLess(elapsed, 1.0)
+            self.assertTrue(lifecycle_receipt["lifecycle_timed_out"])
+            self.assertEqual(lifecycle_receipt["lifecycle_timeout_seconds"], 0.1)
+            self.assertGreaterEqual(lifecycle_receipt["lifecycle_duration_seconds"], 0.1)
+            self.assertLess(lifecycle_receipt["lifecycle_duration_seconds"], 1.0)
+            self.assertTrue(lifecycle_receipt["steps"]["reset"]["executed"])
+            self.assertTrue(lifecycle_receipt["steps"]["reset"]["timed_out"])
+            for name in ("setup", "agent", "oracle"):
+                with self.subTest(step=name):
+                    self.assertFalse(lifecycle_receipt["steps"][name]["executed"])
+            self.assertFalse(agent_marker.exists())
+
+    def test_agent_timeout_terminates_the_agent_process_group(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            manifest = make_manifest(readiness="ready")
+            for index, fixture in enumerate(manifest["fixtures"], start=1):
+                root = base / "fixture-{}".format(index)
+                root.mkdir()
+                control = root / "fixture-control"
+                control.write_text(
+                    "#!/bin/sh\n"
+                    "set -eu\n"
+                    "if [ \"$1\" = oracle ]; then\n"
+                    "  printf '{\"passed\":true}\\n' > \"$3/oracle.json\"\n"
+                    "fi\n",
+                    encoding="utf-8",
+                )
+                control.chmod(0o755)
+                fixture["root"] = root.name
+                fixture["initial_state_digest"] = validate_fixture.tree_digest(root)
+
+            manifest_path = base / "manifest.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            configuration_root = base / "configuration"
+            configuration_root.mkdir()
+            grandchild_pid_path = base / "grandchild.pid"
+            agent = base / "slow-agent.py"
+            agent.write_text(
+                "import pathlib, subprocess, sys, time\n"
+                "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])\n"
+                "pathlib.Path({!r}).write_text(str(child.pid), encoding='utf-8')\n"
+                "time.sleep(60)\n".format(str(grandchild_pid_path)),
+                encoding="utf-8",
+            )
+
+            lifecycle_receipt, success = run_lifecycle.run_lifecycle(
+                manifest_path=manifest_path,
+                task_id="03-systematic-debugging",
+                configuration_revision="process-group-test",
+                configuration_root=configuration_root,
+                repetition_index=1,
+                output_dir=base / "run",
+                agent_argv=[sys.executable, str(agent)],
+                agent_timeout_seconds=30,
+                control_declaration={
+                    "agent": "codex",
+                    "agent_version": "local-test-agent-v1",
+                    "model": "local-no-model-command",
+                    "reasoning_effort": "not-applicable",
+                    "profile": "custom",
+                    "permissions_digest": "sha256:" + ("b" * 64),
+                    "toolset_digest": "sha256:" + ("c" * 64),
+                },
+                lifecycle_timeout_seconds=0.5,
+            )
+
+            self.assertFalse(success)
+            self.assertTrue(lifecycle_receipt["lifecycle_timed_out"])
+            self.assertTrue(lifecycle_receipt["steps"]["agent"]["timed_out"])
+            self.assertFalse(lifecycle_receipt["steps"]["oracle"]["executed"])
+            pid = int(grandchild_pid_path.read_text(encoding="utf-8"))
+            try:
+                self.assertTrue(self._wait_until_process_is_gone(pid))
+            finally:
+                try:
+                    os.kill(pid, 9)
+                except ProcessLookupError:
+                    pass
 
 
 if __name__ == "__main__":

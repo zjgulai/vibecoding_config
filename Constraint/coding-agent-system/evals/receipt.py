@@ -23,11 +23,13 @@ from eval_protocol import (
     safe_relative_posix_path,
     sha256_file,
     validate_digest,
+    validate_evidence_scope,
     verify_artifact_contract,
 )
 
 
-RECEIPT_REVISION = "execution-receipt-v2"
+RECEIPT_REVISION = "execution-receipt-v4"
+RECEIPT_SCHEMA_VERSION = "4"
 INTEGRITY_SCOPE = "local-digest-consistency-only"
 CONTROL_SNAPSHOT_REVISION = "control-snapshot-v1"
 CONTROL_SOURCE_SCOPE = "runner-observed-plus-invocation-declared"
@@ -49,6 +51,7 @@ RECEIPT_FIELDS = (
     "schema_version",
     "runner_revision",
     "integrity_scope",
+    "evidence_scope",
     "manifest_revision",
     "manifest_digest",
     "task_id",
@@ -60,6 +63,9 @@ RECEIPT_FIELDS = (
     "configuration_revision",
     "configuration_digest",
     "repetition_index",
+    "lifecycle_duration_seconds",
+    "lifecycle_timeout_seconds",
+    "lifecycle_timed_out",
     "control_snapshot",
     "agent_argv",
     "artifact_root",
@@ -226,12 +232,15 @@ def validate_receipt(receipt: Mapping) -> None:
     if not isinstance(receipt, Mapping):
         raise ValueError("execution receipt must be an object")
     exact_fields(receipt, RECEIPT_FIELDS, RECEIPT_FIELDS, "execution receipt")
-    if receipt["schema_version"] != "2":
-        raise ValueError("receipt schema_version must be '2'")
+    if receipt["schema_version"] != RECEIPT_SCHEMA_VERSION:
+        raise ValueError(
+            "receipt schema_version must be {!r}".format(RECEIPT_SCHEMA_VERSION)
+        )
     if receipt["runner_revision"] != RECEIPT_REVISION:
         raise ValueError("unsupported runner_revision")
     if receipt["integrity_scope"] != INTEGRITY_SCOPE:
         raise ValueError("receipt integrity_scope must describe local digest consistency only")
+    validate_evidence_scope(receipt["evidence_scope"], "receipt evidence_scope")
     for field in (
         "manifest_revision",
         "task_id",
@@ -251,6 +260,24 @@ def validate_receipt(receipt: Mapping) -> None:
     if receipt["pre_run_digest"] is not None:
         validate_digest(receipt["pre_run_digest"], "pre_run_digest", allow_zero=False)
     nonnegative_integer(receipt["repetition_index"], "repetition_index", minimum=1)
+    lifecycle_duration = optional_number(
+        receipt["lifecycle_duration_seconds"], "lifecycle_duration_seconds"
+    )
+    if lifecycle_duration is None:
+        raise ValueError("lifecycle_duration_seconds must be observed")
+    lifecycle_timeout = optional_number(
+        receipt["lifecycle_timeout_seconds"], "lifecycle_timeout_seconds"
+    )
+    lifecycle_timed_out = receipt["lifecycle_timed_out"]
+    if not isinstance(lifecycle_timed_out, bool):
+        raise ValueError("lifecycle_timed_out must be boolean")
+    if lifecycle_timed_out and lifecycle_timeout is None:
+        raise ValueError("lifecycle_timed_out requires a declared timeout")
+    if lifecycle_timeout is not None:
+        if lifecycle_timed_out and lifecycle_duration < lifecycle_timeout:
+            raise ValueError("timed-out lifecycle duration is below declared timeout")
+        if not lifecycle_timed_out and lifecycle_duration > lifecycle_timeout:
+            raise ValueError("non-timeout lifecycle duration exceeds declared timeout")
     argv(receipt["agent_argv"], "agent_argv")
     safe_relative_posix_path(receipt["artifact_root"], "artifact_root")
     if receipt["artifact_root"] != "artifacts":
@@ -284,7 +311,10 @@ def validate_receipt(receipt: Mapping) -> None:
     if not steps["reset"]["executed"]:
         raise ValueError("runner receipt requires an executed reset step")
     reset_succeeded = _step_succeeded(steps["reset"])
-    if steps["setup"]["executed"] != reset_succeeded:
+    if (
+        steps["setup"]["executed"] != reset_succeeded
+        and not (lifecycle_timed_out and reset_succeeded and not steps["setup"]["executed"])
+    ):
         raise ValueError("setup execution must follow reset success exactly")
     setup_succeeded = _step_succeeded(steps["setup"])
     pre_run_ready = receipt["pre_run_digest"] is not None
@@ -294,9 +324,23 @@ def validate_receipt(receipt: Mapping) -> None:
         pre_run_ready
         and receipt["pre_run_digest"] == receipt["fixture_initial_digest"]
     )
-    if steps["agent"]["executed"] != should_execute_candidate:
+    if (
+        steps["agent"]["executed"] != should_execute_candidate
+        and not (
+            lifecycle_timed_out
+            and should_execute_candidate
+            and not steps["agent"]["executed"]
+        )
+    ):
         raise ValueError("agent execution must follow a matching pre-run digest")
-    if steps["oracle"]["executed"] != should_execute_candidate:
+    if (
+        steps["oracle"]["executed"] != should_execute_candidate
+        and not (
+            lifecycle_timed_out
+            and should_execute_candidate
+            and not steps["oracle"]["executed"]
+        )
+    ):
         raise ValueError("oracle execution must follow a matching pre-run digest")
     if receipt["artifact_contract_valid"] and not steps["oracle"]["executed"]:
         raise ValueError("artifact_contract_valid requires an executed oracle step")
@@ -349,6 +393,7 @@ def verify_receipt_binding(
 
     validate_receipt(receipt)
     expected_fields = {
+        "evidence_scope": manifest["evidence_scope"],
         "manifest_revision": manifest["manifest_revision"],
         "task_id": fixture["task_id"],
         "task_revision": fixture["task_revision"],

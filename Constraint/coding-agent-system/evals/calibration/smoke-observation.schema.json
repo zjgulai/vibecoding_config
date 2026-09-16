@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/smoke-observation.schema.json",
+  "title": "Calibration connectivity smoke observation",
+  "description": "A receipt-bound connectivity observation. It intentionally has no quality score fields.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "observation_revision",
+    "observation_id",
+    "observation_kind",
+    "scope",
+    "task_id",
+    "task_shape",
+    "execution_configuration",
+    "execution_configuration_digest",
+    "receipt_configuration_digest",
+    "outcome",
+    "oracle_outcome",
+    "batch_binding",
+    "lifecycle_binding",
+    "summary_ref",
+    "receipt_ref",
+    "measurements",
+    "unverified_scope"
+  ],
+  "properties": {
+    "schema_version": { "const": "2" },
+    "observation_revision": { "const": "smoke-observation-v2" },
+    "observation_id": { "$ref": "#/$defs/nonblank" },
+    "observation_kind": { "const": "connectivity-smoke" },
+    "scope": { "const": "connectivity-only" },
+    "task_id": { "$ref": "#/$defs/nonblank" },
+    "task_shape": { "$ref": "#/$defs/nonblank" },
+    "execution_configuration": {
+      "$ref": "capability-card.schema.json#/$defs/executionConfiguration"
+    },
+    "execution_configuration_digest": { "$ref": "#/$defs/digest" },
+    "receipt_configuration_digest": { "$ref": "#/$defs/digest" },
+    "outcome": { "$ref": "#/$defs/outcome" },
+    "oracle_outcome": { "enum": ["pass", "fail", "not-run"] },
+    "batch_binding": { "$ref": "#/$defs/batchBinding" },
+    "lifecycle_binding": { "$ref": "#/$defs/lifecycleBinding" },
+    "summary_ref": { "$ref": "#/$defs/reference" },
+    "receipt_ref": { "$ref": "#/$defs/reference" },
+    "measurements": {
+      "$ref": "capability-card.schema.json#/$defs/measurements"
+    },
+    "unverified_scope": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonblank" }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "properties": { "status": { "const": "completed" } }
+          }
+        }
+      },
+      "then": {
+        "properties": { "oracle_outcome": { "const": "pass" } }
+      }
+    }
+  ],
+  "$defs": {
+    "nonblank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "safePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+"
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "digest"],
+      "properties": {
+        "path": { "$ref": "#/$defs/safePath" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "batchBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "batch_id", "batch_ref"],
+      "properties": {
+        "state": { "const": "receipt-bound" },
+        "batch_id": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/nonblank" }
+          ]
+        },
+        "batch_ref": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/reference" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "properties": {
+            "batch_id": { "$ref": "#/$defs/nonblank" },
+            "batch_ref": { "$ref": "#/$defs/reference" }
+          }
+        }
+      ]
+    },
+    "lifecycleBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest_ref",
+        "configuration_root",
+        "control_ref",
+        "artifact_root",
+        "fixture_root",
+        "prompt_ref",
+        "adapter_ref",
+        "installation_ref",
+        "authorization_ref",
+        "authorization_consumption_ref"
+      ],
+      "properties": {
+        "manifest_ref": { "$ref": "#/$defs/reference" },
+        "configuration_root": { "$ref": "#/$defs/reference" },
+        "control_ref": { "$ref": "#/$defs/reference" },
+        "artifact_root": { "$ref": "#/$defs/reference" },
+        "fixture_root": { "$ref": "#/$defs/reference" },
+        "prompt_ref": { "$ref": "#/$defs/reference" },
+        "adapter_ref": { "$ref": "#/$defs/reference" },
+        "installation_ref": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/reference" }
+          ]
+        },
+        "authorization_ref": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/reference" }
+          ]
+        },
+        "authorization_consumption_ref": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/reference" }
+          ]
+        }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "stop_reason"],
+      "properties": {
+        "status": { "enum": ["completed", "failed", "stopped"] },
+        "stop_reason": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/nonblank" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "completed" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": { "stop_reason": { "type": "null" } }
+          },
+          "else": {
+            "properties": { "stop_reason": { "$ref": "#/$defs/nonblank" } }
+          }
+        }
+      ]
+    }
+  }
+}

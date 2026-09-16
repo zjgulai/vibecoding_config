@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0",
-  "generated_on": "2026-08-29",
-  "purpose": "Lock external research-method inputs without installing, vendoring, or executing their code.",
+  "generated_on": "2026-09-15",
+  "purpose": "Lock external research-method inputs without installing or vendoring them; any narrowly scoped isolated execution is recorded explicitly and is not treated as method-effect evidence.",
   "policy": {
     "allowed_decisions": [
       "adapt",
       "exclude"
     ],
     "reuse_boundary": "Method concepts may be cited and independently rewritten. Repository code, instruction text, datasets, and experiment results are not copied or represented as project capabilities without a separately verified license and explicit review.",
-    "execution_boundary": "No repository script, training workload, package installation, or autonomous experiment was run. Repository metadata and pinned text files were inspected read-only."
+    "execution_boundary": "No package installation, training workload, product build, autonomous experiment, or project-side third-party code execution was run. Repository metadata and pinned files were inspected read-only. Sahir619/fable-method's structural checker was run only in an isolated temporary copy; that passing check proves repository structure, not method effectiveness."
   },
   "repositories": [
     {
@@ -24,6 +24,36 @@
         "github_license_metadata": null,
         "verified_grant": false,
         "note": "At the pinned commit, README.md ends with an MIT label, but the repository contains no LICENSE, LICENSE.md, LICENSE.txt, COPYING, or equivalent license text. This project does not treat the label alone as permission to copy code or long-form instructions."
+      }
+    },
+    {
+      "id": "fable-compiler",
+      "role": "multi-target-engineering-method-source",
+      "repository_url": "https://github.com/fable-compiler/Fable.git",
+      "commit": "5d62380cb30dc1080c6943445a256e27db6246f8",
+      "commit_date": "2026-09-14T20:39:51Z",
+      "accessed_on": "2026-09-15",
+      "license": {
+        "readme_declaration": null,
+        "license_file": "LICENSE",
+        "github_license_metadata": "MIT",
+        "verified_grant": true,
+        "note": "The pinned LICENSE contains the MIT grant and identifies Alfonso Garcia-Caro and contributors. This project cites architecture and workflow concepts and does not vendor Fable compiler code."
+      }
+    },
+    {
+      "id": "sahir-fable-method",
+      "role": "agent-workflow-method-source",
+      "repository_url": "https://github.com/Sahir619/fable-method.git",
+      "commit": "88b5cf36b10ee3679e08ee0f0181b9774d481508",
+      "commit_date": "2026-07-15T13:01:59Z",
+      "accessed_on": "2026-09-15",
+      "license": {
+        "readme_declaration": "MIT",
+        "license_file": "LICENSE",
+        "github_license_metadata": "MIT",
+        "verified_grant": true,
+        "note": "The pinned LICENSE contains the MIT grant and identifies Sahir619. The repository describes itself as a community distillation rather than an Anthropic artifact. This project independently rewrites selected decision and evaluation patterns."
       }
     }
   ],
@@ -48,6 +78,51 @@
         "automatic Git branch, commit, or reset behavior"
       ],
       "reason": "The bounded edit-run-measure-keep/discard loop is relevant to controlled Coding Agent configuration comparisons, but the training implementation, autonomy policy, and repository license evidence do not transfer to this project."
+    },
+    {
+      "candidate": "canonical contract to target-native delivery pipeline",
+      "source_repository": "fable-compiler",
+      "decision": "adapt",
+      "target": "conditional multi-target product delivery and native verification",
+      "adapted_concepts": [
+        "normalize shared semantics before target-specific translation",
+        "separate shared transforms from target adapters and materializers",
+        "verify a reference contract and then execute target-native tests",
+        "use a quick reproducer before expanding to an affected target matrix",
+        "protect generated outputs and lockfiles from incidental validation changes",
+        "mark target capabilities by maturity and compatibility evidence"
+      ],
+      "excluded_material": [
+        "F# or Fable compiler as a default product technology",
+        "compiler-specific AST and target implementation code",
+        "unconditional intermediate representations for single-target applications",
+        "Fable repository-specific command allowlists or ignored paths",
+        "Claude-specific @AGENTS.md import syntax as a cross-platform mechanism"
+      ],
+      "reason": "The repository provides high-quality evidence for maintaining shared semantics across heterogeneous targets, but the transferable value is the boundary and verification design rather than its compiler technology."
+    },
+    {
+      "candidate": "evidence-led task loop and trap-first rule evolution",
+      "source_repository": "sahir-fable-method",
+      "decision": "adapt",
+      "target": "existing Control Contract, implementation, review and M13 evolution workflow",
+      "adapted_concepts": [
+        "classify the request and name observable done plus its verification",
+        "resolve intent against authoritative specification before changing tests",
+        "search for semantic twins after confirming a root-cause pattern",
+        "audit completion claims against independent observations",
+        "package a reusable workflow candidate with an adapter, trap fixture, answer oracle and smoke comparison",
+        "retain null and negative evaluation results"
+      ],
+      "excluded_material": [
+        "a mandatory full loop for every task",
+        "fixed lookup, retry or source-count thresholds across projects",
+        "user-visible method scaffolding on every response",
+        "automatic nested skill discovery",
+        "cross-model superiority claims from small synthetic evaluations",
+        "upstream install scripts and duplicate control-plane artifacts"
+      ],
+      "reason": "Decision-point checks and adversarial fixtures complement the current system, while the upstream evaluation is smoke-level and its own negative results argue against universal activation."
     }
   ],
   "adopted_verbatim": []

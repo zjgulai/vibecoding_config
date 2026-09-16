@@ -25,3 +25,6 @@ build/
 .env
 .env.*
 !.env.example
+
+# Local one-shot calibration authorization consumption registry
+Constraint/coding-agent-system/evals/calibration/.authorization-consumption-v1/

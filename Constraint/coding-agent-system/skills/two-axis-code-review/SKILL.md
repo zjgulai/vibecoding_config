@@ -25,11 +25,12 @@ metadata:
 4. 独立完成两轴审查：
    - Standards 轴报告有证据的正确性、安全性、兼容性、测试或维护风险；启发式 smell 标为判断，不冒充硬性规则。
    - Spec 轴逐项检查遗漏、部分实现、错误实现和 scope creep；每条 finding 引用对应要求，若没有来源则说明推断依据。
-5. 每条 finding 给出 severity、文件/行、触发条件、影响和最小修正方向。先 findings，后简短总结；没有 finding 时明确写 `No findings` 并列出未验证范围。
+5. 对完成报告中的关键主张建立 `claim → observation → verdict` 表。报告、配置、绿色 CI 摘要或实现者自述都不是独立证据；在只读范围内重跑命名验证或检查实际 diff/运行状态，结论只能是 `Verified`、`Verified with caveats`、`Refuted` 或 `Unverified`。
+6. 每条 finding 给出 severity、文件/行、触发条件、影响和最小修正方向。先 findings，后简短总结；没有 finding 时明确写 `No findings` 并列出未验证范围。若同一批准契约有多个目标实现，分别检查 reference contract 与 target-native 结果，不为单个 target 降低共同验收。
 
 ## Completion criterion
 
-所有 changed behavior 都在两个轴线上被审视；findings 可定位、可复现并能追溯到代码与规则/需求证据。两轴分别汇总，不用一个总分掩盖任何一轴。
+所有 changed behavior 都在两个轴线上被审视；findings 可定位、可复现并能追溯到代码与规则/需求证据。关键完成主张有独立 observation 和 verdict；两轴分别汇总，不用一个总分掩盖任何一轴。
 
 ## Authorization boundary
 

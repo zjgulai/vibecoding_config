@@ -13,6 +13,7 @@ from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 
 SHA256_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+EVIDENCE_SCOPES = ("representative", "synthetic-harness-only")
 
 
 def _object_without_duplicate_keys(pairs: Iterable[Tuple[str, object]]) -> Dict:
@@ -54,6 +55,17 @@ def nonblank(value: object, label: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError("{} must be a non-blank string".format(label))
     return value
+
+
+def validate_evidence_scope(value: object, label: str) -> str:
+    """Return one explicitly declared evidence scope or fail closed."""
+
+    scope = nonblank(value, label)
+    if scope not in EVIDENCE_SCOPES:
+        raise ValueError(
+            "{} must be one of: {}".format(label, ", ".join(EVIDENCE_SCOPES))
+        )
+    return scope
 
 
 def safe_relative_posix_path(value: object, label: str) -> str:

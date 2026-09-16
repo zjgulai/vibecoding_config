@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "task_id": "02-vertical-full-stack-feature",
+  "evidence_scope": "synthetic-harness-only",
+  "mode": "interactive",
+  "allowed_workspace_files": [
+    "risk_note.py",
+    "risk_note_api.py",
+    "risk_note_migration.py",
+    "risk_note_render.py"
+  ],
+  "local_retry_limit": 0,
+  "stop_conditions": [
+    "scope_breach",
+    "artifact_contract_failure",
+    "oracle_failure"
+  ],
+  "unverified_scope": [
+    "real-agent-behavior",
+    "browser-execution",
+    "database-execution"
+  ]
+}
